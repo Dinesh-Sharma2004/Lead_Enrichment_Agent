@@ -32,10 +32,31 @@ def test_repair_llm_json_fallback():
 def test_calculate_heuristic_confidence():
     intel_dict = {
         "company_overview": "Overview sentence one. Overview sentence two.",
-        "products_services": [{"name": "Product 1"}],
+        "products_services": [{"name": "Product 1", "description": "Desc", "source_url": "https://example.com"}],
         "leadership": [],
         "contact_points": []
     }
     # 1.0 - 0.3 (leadership) - 0.1 (contact) = 0.6
     score = calculate_heuristic_confidence(intel_dict)
     assert score == 0.6
+
+def test_calculate_heuristic_confidence_fill_rate_ordering():
+    incomplete_leadership = {
+        "company_overview": "Overview sentence one. Overview sentence two.",
+        "products_services": [{"name": "Product 1", "description": "Desc 1", "source_url": "https://example.com/p1"}],
+        "leadership": [{"name": "John Doe", "role": "", "linkedin_url": None, "source_url": ""}],
+        "contact_points": [{"value": "info@example.com", "source_url": "https://example.com"}]
+    }
+
+    fully_populated_leadership = {
+        "company_overview": "Overview sentence one. Overview sentence two.",
+        "products_services": [{"name": "Product 1", "description": "Desc 1", "source_url": "https://example.com/p1"}],
+        "leadership": [{"name": "John Doe", "role": "CEO", "linkedin_url": "https://linkedin.com/in/johndoe", "source_url": "https://example.com/about"}],
+        "contact_points": [{"value": "info@example.com", "source_url": "https://example.com"}]
+    }
+
+    score_incomplete = calculate_heuristic_confidence(incomplete_leadership)
+    score_full = calculate_heuristic_confidence(fully_populated_leadership)
+
+    assert score_incomplete < score_full
+

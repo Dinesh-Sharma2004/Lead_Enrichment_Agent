@@ -12,8 +12,8 @@ BLOCKED_MARKERS = [
 
 def clean_html(html: str) -> str:
     """
-    Cleans raw HTML by removing scripts, styles, SVGs, and navigation boilerplate,
-    and returning clean text.
+    Cleans raw HTML by removing scripts, styles, SVGs, navigation boilerplate,
+    link-dense navigation/menu blocks, and returning clean text.
     """
     if not html:
         return ""
@@ -23,6 +23,17 @@ def clean_html(html: str) -> str:
     # Remove unwanted tags
     for tag in soup(["script", "style", "svg", "nav", "footer", "header", "aside", "noscript", "iframe", "meta", "link"]):
         tag.decompose()
+
+    # Link-density heuristic: decompose <div> and <ul> blocks where link text / total text > 0.7
+    for block in list(soup.find_all(["div", "ul"])):
+        if block.parent is None:
+            continue
+        block_text = block.get_text(strip=True)
+        if not block_text:
+            continue
+        anchor_text = "".join(a.get_text(strip=True) for a in block.find_all("a"))
+        if len(anchor_text) / len(block_text) > 0.7:
+            block.decompose()
 
     # Get text
     text = soup.get_text(separator="\n")
@@ -34,17 +45,27 @@ def clean_html(html: str) -> str:
 def is_blocked_page(html: str) -> bool:
     """
     Checks if an HTML string indicates a bot-blocked page or security challenge page.
+    Requires either a title match or (a body-text marker match and body text < 200 chars).
     """
     if not html:
         return False
 
-    html_lower = html.lower()
-    for marker in BLOCKED_MARKERS:
-        if marker in html_lower:
-            return True
+    soup = BeautifulSoup(html, "html.parser")
+    title_text = soup.title.string.strip().lower() if (soup.title and soup.title.string) else ""
 
     text = clean_html(html)
+    body_head_lower = text[:500].lower()
+
+    # 1. Check title tag match
+    for marker in BLOCKED_MARKERS:
+        if marker in title_text:
+            return True
+
+    # 2. Check visible body text match only if page text is short (< 200 chars)
     if len(text) < 200:
-        return True
+        for marker in BLOCKED_MARKERS:
+            if marker in body_head_lower:
+                return True
 
     return False
+

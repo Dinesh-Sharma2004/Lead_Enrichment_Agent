@@ -1,6 +1,6 @@
 import asyncio
 import aiohttp
-from typing import List
+from typing import List, Optional
 from .schemas import SerpSearchResult
 from .config import SERPAPI_API_KEY
 from .logger import get_logger
@@ -65,4 +65,55 @@ async def search_leadership(company_name: str) -> List[SerpSearchResult]:
         logger.error(f"Error during SerpAPI search: {str(e)}")
         
     return results
+
+async def search_person_linkedin(name: str, company_name: str) -> Optional[str]:
+    """
+    Searches for a specific person's LinkedIn URL at a company using SerpAPI.
+    Returns the LinkedIn URL if found, or None.
+    """
+    if not SERPAPI_API_KEY:
+        logger.warning("SerpAPI key not found. Skipping person search.")
+        return None
+
+    if not name or not company_name or company_name.lower() in ("unknown", "none", "n/a"):
+        return None
+
+    logger.info(f"Performing SerpAPI person search for '{name}' at '{company_name}'...")
+    query = f'site:linkedin.com/in/ "{name}" "{company_name}"'
+    
+    params = {
+        "engine": "google",
+        "q": query,
+        "api_key": SERPAPI_API_KEY,
+        "num": 3
+    }
+    
+    try:
+        async with aiohttp.ClientSession() as session:
+            for attempt in range(2):
+                async with session.get("https://serpapi.com/search", params=params) as response:
+                    if response.status == 429 and attempt == 0:
+                        retry_after = response.headers.get("Retry-After")
+                        sleep_sec = float(retry_after) if (retry_after and retry_after.isdigit()) else 2.0
+                        logger.warning(f"SerpAPI 429 Rate Limit encountered. Retrying in {sleep_sec}s...")
+                        await asyncio.sleep(sleep_sec)
+                        continue
+
+                    if response.status == 200:
+                        data = await response.json()
+                        organic_results = data.get("organic_results", [])
+                        for res in organic_results:
+                            link = res.get("link", "")
+                            if "linkedin.com/in/" in link:
+                                return link
+                        return None
+                    else:
+                        logger.error(f"SerpAPI returned status {response.status}")
+                        return None
+    except Exception as e:
+        logger.error(f"Error during SerpAPI person search: {str(e)}")
+        
+    return None
+
+
 

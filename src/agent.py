@@ -4,8 +4,8 @@ from collections import deque
 from .browser import BrowserManager, PageResult
 from .discovery import discover_links
 from .extraction import clean_html
-from .llm import extract_structured_data
-from .search import search_leadership
+from .llm import extract_structured_data, calculate_heuristic_confidence
+from .search import search_leadership, search_person_linkedin
 from .schemas import CompanyIntelligence, Leader
 from .logger import get_logger
 from .config import MAX_PAGES_PER_DOMAIN, ENABLE_SERPAPI
@@ -94,31 +94,62 @@ async def process_domain(domain: str, browser_manager: BrowserManager) -> Compan
     # 4. Extract structured data via LLM
     intel = await extract_structured_data(domain, collected_text, list(all_mailto_emails))
 
-    # Flag bot block status if homepage was blocked
-    if home_res.blocked:
+    # Flag bot block status only if homepage was blocked AND core data was empty/thin
+    if home_res.blocked and (not intel.company_overview and not intel.products_services):
         intel.extraction_status = f"Blocked - Bot block detected on homepage | {intel.extraction_status}"
 
     # 5. Conditional SerpAPI Search
-    if ENABLE_SERPAPI and len(intel.leadership) == 0:
+    if ENABLE_SERPAPI:
         search_company_name = intel.company_name
         if not search_company_name or search_company_name.lower() == "unknown":
             search_company_name = domain.split('.')[0].capitalize()
 
-        logger.info(f"No leadership found on site for {domain}. Attempting SerpAPI search for '{search_company_name}'...")
-        search_results = await search_leadership(search_company_name)
-        if search_results:
-            for res in search_results:
-                intel.leadership.append(
-                    Leader(
-                        name=res.name,
-                        role=res.role,
-                        linkedin_url=res.linkedin_url,
-                        source_url="SerpAPI Search"
+        # 5a. Leadership fully empty fallback
+        if len(intel.leadership) == 0:
+            logger.info(f"No leadership found on site for {domain}. Attempting SerpAPI search for '{search_company_name}'...")
+            search_results = await search_leadership(search_company_name)
+            if search_results:
+                for res in search_results:
+                    intel.leadership.append(
+                        Leader(
+                            name=res.name,
+                            role=res.role,
+                            linkedin_url=res.linkedin_url,
+                            source_url="SerpAPI Search",
+                            grounded=True
+                        )
                     )
-                )
-            intel.extraction_status += " | Leadership enriched via SerpAPI"
-            intel.heuristic_confidence_score = max(0.1, round(intel.heuristic_confidence_score - 0.1, 2))
-            intel.confidence_score = min(intel.llm_confidence_score, intel.heuristic_confidence_score)
+                intel.extraction_status += " | Leadership enriched via SerpAPI"
+                intel.heuristic_confidence_score = calculate_heuristic_confidence(intel.model_dump())
+                intel.confidence_score = min(intel.llm_confidence_score, intel.heuristic_confidence_score)
+
+        # 5b. Partial gap backfill for leadership missing linkedin_url or ungrounded (Bug 4)
+        elif len(intel.leadership) > 0:
+            lookups_fired = 0
+            lookups_resolved = 0
+            max_lookups = 3
+
+            for leader in intel.leadership:
+                if lookups_fired >= max_lookups:
+                    break
+                if not leader.linkedin_url or not leader.grounded:
+                    lookups_fired += 1
+                    found_url = await search_person_linkedin(leader.name, search_company_name)
+                    if found_url:
+                        leader.linkedin_url = found_url
+                        if not leader.grounded or leader.source_url == "" or leader.source_url == "SerpAPI Search":
+                            leader.source_url = "SerpAPI Search"
+                            leader.grounded = True
+                            if leader.role.startswith("[Unverified] "):
+                                leader.role = leader.role.replace("[Unverified] ", "")
+                        lookups_resolved += 1
+
+            logger.info(f"Per-person SerpAPI lookups for {domain}: {lookups_fired} fired, {lookups_resolved} resolved.")
+            if lookups_resolved > 0:
+                intel.extraction_status += " | Partial leadership enriched via SerpAPI"
+                intel.heuristic_confidence_score = calculate_heuristic_confidence(intel.model_dump())
+                intel.confidence_score = min(intel.llm_confidence_score, intel.heuristic_confidence_score)
 
     logger.info(f"Finished processing {domain}. Status: {intel.extraction_status}")
     return intel
+

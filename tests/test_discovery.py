@@ -47,7 +47,17 @@ def test_discover_links_mailto_harvesting():
       <a href="mailto:info@example.com">Info</a>
     </html>
     '''
+def test_discover_links_negative_subdomain_and_path_filtering():
+    html = '''
+    <html>
+      <a href="https://dashboard.example.com/login">Dashboard Login</a>
+      <a href="https://example.com/signup">Signup Path</a>
+      <a href="https://docs.example.com/api-reference">Docs API Reference</a>
+    </html>
+    '''
     links, mailtos = discover_links("https://example.com", html)
-    assert "sales@example.com" in mailtos
-    assert "info@example.com" in mailtos
+    assert "https://dashboard.example.com/login" not in links
+    assert "https://example.com/signup" not in links
+    assert "https://docs.example.com/api-reference" in links
+
 

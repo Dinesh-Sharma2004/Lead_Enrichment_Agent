@@ -16,16 +16,31 @@ RELEVANT_PATH_PATTERNS = [
     r'/career'
 ]
 
+NEGATIVE_PATH_PATTERNS = [
+    r'/login',
+    r'/signin',
+    r'/signup',
+    r'/register',
+    r'/logout'
+]
+
+NEGATIVE_SUBDOMAIN_PREFIXES = [
+    'dashboard.',
+    'app.',
+    'portal.',
+    'my.'
+]
+
 def discover_links(base_url: str, html: str) -> Tuple[List[str], List[str]]:
     """
     Extracts internal page links and mailto email addresses from HTML content.
+    Excludes negative path patterns and auth/dashboard subdomains.
     Returns a tuple of (prioritized_page_links, mailto_emails).
     """
     if not html:
         return [], []
 
     soup = BeautifulSoup(html, "html.parser")
-
 
     base_parsed = urlparse(base_url)
     base_domain = base_parsed.netloc
@@ -51,6 +66,15 @@ def discover_links(base_url: str, html: str) -> Tuple[List[str], List[str]]:
         parsed_url = urlparse(full_url)
         
         target_netloc = parsed_url.netloc if parsed_url.netloc else base_domain
+
+        # Negative subdomain check
+        if any(target_netloc.startswith(prefix) for prefix in NEGATIVE_SUBDOMAIN_PREFIXES):
+            continue
+
+        # Negative path check
+        path_lower = parsed_url.path.lower()
+        if any(re.search(pattern, path_lower) for pattern in NEGATIVE_PATH_PATTERNS):
+            continue
 
         # Check if internal domain or subdomain
         is_internal = False
@@ -79,3 +103,4 @@ def discover_links(base_url: str, html: str) -> Tuple[List[str], List[str]]:
 
     page_links = sorted(prioritized) + sorted(others)
     return page_links, sorted(list(mailto_emails))
+

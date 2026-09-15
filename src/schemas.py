@@ -5,17 +5,20 @@ class Leader(BaseModel):
     name: str = Field(default="", description="Full name of the leader or key team member.")
     role: str = Field(default="", description="Job title or role of the person.")
     linkedin_url: Optional[str] = Field(default=None, description="LinkedIn profile URL if available.")
-    source_url: str = Field(default="", description="The specific URL where this leadership information was found.")
+    source_url: str = Field(default="", min_length=1, description="The specific URL where this leadership information was found.")
+    grounded: bool = Field(default=True, description="Whether this entry was verified against crawled page URLs.")
 
 class ProductOrService(BaseModel):
     name: str = Field(default="", description="Name of the product or service.")
-    description: str = Field(default="", description="Brief description of the product or service.")
-    source_url: str = Field(default="", description="The URL where this product/service was described.")
+    description: str = Field(default="", min_length=1, description="Brief description of the product or service.")
+    source_url: str = Field(default="", min_length=1, description="The URL where this product/service was described.")
+    grounded: bool = Field(default=True, description="Whether this entry was verified against crawled page URLs.")
 
 class ContactPoint(BaseModel):
     type: str = Field(default="Email", description="Type of contact (e.g., General Email, Sales Email, Support, Phone).")
-    value: str = Field(default="", description="The email address or phone number.")
-    source_url: str = Field(default="", description="The URL where this contact point was found.")
+    value: str = Field(default="", min_length=1, description="The email address or phone number.")
+    source_url: str = Field(default="", min_length=1, description="The URL where this contact point was found.")
+    grounded: bool = Field(default=True, description="Whether this entry was verified against crawled page URLs.")
 
 class CompanyIntelligence(BaseModel):
     domain: str = Field(default="", description="The company's domain name.")

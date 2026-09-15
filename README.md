@@ -100,7 +100,11 @@ Generated outputs:
 - **Dual Scoring Engine:** Stores both `llm_confidence_score` (LLM self-assessed completeness and groundedness rating) and `heuristic_confidence_score` (rule-based score deducting points for missing overview, leadership, products, or contact info).
 - **Final Score:** Set to `min(llm_confidence_score, heuristic_confidence_score)` to ensure the score accurately reflects missing mandatory fields even if the LLM self-assesses optimistically.
 
-### 4. Tuning Environment Knobs (`.env`)
+### 4. Leadership Grounding & Testimonial Mitigation
+- Leadership entries extracted from plain-text pages carry a risk of misidentifying customer quote bios or partner testimonials as company executives.
+- The extraction system prompt explicitly constrains leadership classification to identified team members/executives, and post-processing verifies `source_url` grounding against crawled pages. However, homepage-sourced quotes still carry minor false-positive risks without dedicated semantic structure.
+
+### 5. Tuning Environment Knobs (`.env`)
 | Variable | Default | Description |
 | :--- | :--- | :--- |
 | `NETWORK_IDLE_TIMEOUT_MS` | `5000` | Secondary best-effort timeout for `networkidle` load state. |

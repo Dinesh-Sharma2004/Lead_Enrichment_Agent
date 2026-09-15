@@ -57,43 +57,45 @@ def repair_llm_json(raw_data: Dict[str, Any], domain: str, processed_urls: List[
     if isinstance(products_raw, list):
         for p in products_raw:
             if isinstance(p, dict):
-                prod_list.append({
-                    'name': str(p.get('name', '')),
-                    'description': str(p.get('description', '')),
-                    'source_url': str(p.get('source_url', processed_urls[0] if processed_urls else ""))
-                })
-            elif isinstance(p, str):
-                prod_list.append({
-                    'name': p,
-                    'description': p,
-                    'source_url': processed_urls[0] if processed_urls else ""
-                })
+                desc = str(p.get('description', '')).strip()
+                src = str(p.get('source_url', processed_urls[0] if processed_urls else f"https://{domain}")).strip()
+                if desc and src:
+                    prod_list.append({
+                        'name': str(p.get('name', '')).strip(),
+                        'description': desc,
+                        'source_url': src
+                    })
     normalized['products_services'] = prod_list
 
     # 5. Contact Points
     contact_raw = key_map.get('contact_points', key_map.get('contacts', key_map.get('contact_emails', [])))
     contact_list = []
+    default_src = processed_urls[0] if processed_urls else f"https://{domain}"
     if isinstance(contact_raw, dict):
         emails = contact_raw.get('emails', contact_raw.get('email_addresses', []))
         for item in emails:
             if isinstance(item, dict):
-                contact_list.append({
-                    'type': str(item.get('type', 'Email')),
-                    'value': str(item.get('value', item.get('email', ''))),
-                    'source_url': str(item.get('source_url', processed_urls[0] if processed_urls else ""))
-                })
-            elif isinstance(item, str):
-                contact_list.append({'type': 'Email', 'value': item, 'source_url': processed_urls[0] if processed_urls else ""})
+                val = str(item.get('value', item.get('email', ''))).strip()
+                if val:
+                    contact_list.append({
+                        'type': str(item.get('type', 'Email')),
+                        'value': val,
+                        'source_url': str(item.get('source_url', default_src)).strip() or default_src
+                    })
+            elif isinstance(item, str) and item.strip():
+                contact_list.append({'type': 'Email', 'value': item.strip(), 'source_url': default_src})
     elif isinstance(contact_raw, list):
         for c in contact_raw:
             if isinstance(c, dict):
-                contact_list.append({
-                    'type': str(c.get('type', 'Email')),
-                    'value': str(c.get('value', c.get('email', ''))),
-                    'source_url': str(c.get('source_url', processed_urls[0] if processed_urls else ""))
-                })
-            elif isinstance(c, str):
-                contact_list.append({'type': 'Email', 'value': c, 'source_url': processed_urls[0] if processed_urls else ""})
+                val = str(c.get('value', c.get('email', ''))).strip()
+                if val:
+                    contact_list.append({
+                        'type': str(c.get('type', 'Email')),
+                        'value': val,
+                        'source_url': str(c.get('source_url', default_src)).strip() or default_src
+                    })
+            elif isinstance(c, str) and c.strip():
+                contact_list.append({'type': 'Email', 'value': c.strip(), 'source_url': default_src})
     normalized['contact_points'] = contact_list
 
     # 6. Leadership
@@ -105,11 +107,12 @@ def repair_llm_json(raw_data: Dict[str, Any], domain: str, processed_urls: List[
     if isinstance(leaders_raw, list):
         for l in leaders_raw:
             if isinstance(l, dict):
+                src = str(l.get('source_url', default_src)).strip() or default_src
                 leader_list.append({
-                    'name': str(l.get('name', '')),
-                    'role': str(l.get('role', l.get('title', ''))),
+                    'name': str(l.get('name', '')).strip(),
+                    'role': str(l.get('role', l.get('title', ''))).strip(),
                     'linkedin_url': l.get('linkedin_url', l.get('linkedin', None)),
-                    'source_url': str(l.get('source_url', processed_urls[0] if processed_urls else ""))
+                    'source_url': src
                 })
     normalized['leadership'] = leader_list
 
@@ -122,21 +125,57 @@ def repair_llm_json(raw_data: Dict[str, Any], domain: str, processed_urls: List[
 
     return normalized
 
+
 # Backward compatibility alias
 normalize_llm_json = repair_llm_json
 
 
+
 def calculate_heuristic_confidence(company_intel: Dict[str, Any]) -> float:
-    """Calculates rule-based heuristic confidence score between 0.0 and 1.0."""
+    """Calculates rule-based heuristic confidence score between 0.0 and 1.0 considering fill quality."""
     score = 1.0
-    if not company_intel.get('company_overview'):
+    
+    # 1. Company Overview
+    overview = company_intel.get('company_overview', '')
+    if not overview:
         score -= 0.2
-    if not company_intel.get('products_services'):
+        
+    # 2. Products / Services
+    products = company_intel.get('products_services', [])
+    if not products:
         score -= 0.2
-    if not company_intel.get('leadership'):
+    else:
+        valid_count = sum(
+            1 for p in products 
+            if isinstance(p, dict) and p.get('description') and p.get('source_url')
+        )
+        fill_rate = valid_count / len(products)
+        score -= 0.2 * (1.0 - fill_rate)
+
+    # 3. Leadership
+    leaders = company_intel.get('leadership', [])
+    if not leaders:
         score -= 0.3
-    if not company_intel.get('contact_points'):
+    else:
+        valid_count = sum(
+            1 for l in leaders 
+            if isinstance(l, dict) and (l.get('role') or l.get('linkedin_url')) and not str(l.get('role', '')).startswith('[Unverified]')
+        )
+        fill_rate = valid_count / len(leaders)
+        score -= 0.3 * (1.0 - fill_rate)
+
+    # 4. Contact Points
+    contacts = company_intel.get('contact_points', [])
+    if not contacts:
         score -= 0.1
+    else:
+        valid_count = sum(
+            1 for c in contacts 
+            if isinstance(c, dict) and c.get('value') and c.get('source_url')
+        )
+        fill_rate = valid_count / len(contacts)
+        score -= 0.1 * (1.0 - fill_rate)
+
     return round(max(0.0, score), 2)
 
 
@@ -213,7 +252,9 @@ async def extract_structured_data(
         "You are a precise corporate intelligence data extractor.\n"
         "Assess data completeness honestly and self-assess `llm_confidence_score` (0.0 to 1.0) "
         "and provide a short `confidence_rationale` explaining your rating (e.g. grounded overview, leadership found, contact info available).\n"
-        "Do NOT invent facts. If information is missing, leave fields empty."
+        "Do NOT invent facts. If information is missing, leave fields empty.\n"
+        "Only include a product/service entry if you can also give a real one-sentence description and the exact source URL it came from. If you can't, omit the product entirely rather than leaving fields blank.\n"
+        "Only classify a person as leadership if the surrounding text explicitly identifies them as an employee, executive, or team member of the target company (e.g. their title includes the company name, or they appear on a page whose URL contains /about, /team, /company, or /leadership). Do not include people quoted as customers, partners, or in press mentions."
     )
 
     user_prompt = f"Extract company intelligence for {domain} from the following website text:{mailto_hint}\n{content_payload}"
@@ -274,6 +315,26 @@ async def extract_structured_data(
         raw_data['total_tokens_used'] = total_tokens
         raw_data['estimated_cost_usd'] = round(estimated_cost, 6)
 
+        # Filter out products missing description or source_url per Bug 2
+        filtered_prods = []
+        for p in raw_data.get('products_services', []):
+            if isinstance(p, dict):
+                desc = str(p.get('description', '')).strip()
+                src = str(p.get('source_url', '')).strip()
+                if desc and src:
+                    filtered_prods.append(p)
+        raw_data['products_services'] = filtered_prods
+
+        # Ensure leadership items have a non-empty source_url for Pydantic min_length=1 validation
+        default_src = processed_urls[0] if processed_urls else f"https://{domain}"
+        filtered_leaders = []
+        for l in raw_data.get('leadership', []):
+            if isinstance(l, dict):
+                if not l.get('source_url'):
+                    l['source_url'] = default_src
+                filtered_leaders.append(l)
+        raw_data['leadership'] = filtered_leaders
+
         try:
             intel = CompanyIntelligence(**raw_data)
             logger.info(f"Strict Pydantic schema validation succeeded for {domain}.")
@@ -284,13 +345,33 @@ async def extract_structured_data(
             repaired['estimated_cost_usd'] = round(estimated_cost, 6)
             intel = CompanyIntelligence(**repaired)
 
+        # Grounding validation check (Bug 3 & Bug 2)
+        norm_processed = {u.rstrip('/') for u in processed_urls}
+        
+        for leader in intel.leadership:
+            source_norm = leader.source_url.rstrip('/') if leader.source_url else ""
+            if not source_norm or source_norm not in norm_processed:
+                leader.grounded = False
+                if not leader.role.startswith("[Unverified]"):
+                    leader.role = f"[Unverified] {leader.role}".strip() if leader.role else "[Unverified]"
+
+        for prod in intel.products_services:
+            source_norm = prod.source_url.rstrip('/') if prod.source_url else ""
+            if not source_norm or source_norm not in norm_processed:
+                prod.grounded = False
+
+        for cp in intel.contact_points:
+            source_norm = cp.source_url.rstrip('/') if cp.source_url else ""
+            if not source_norm or source_norm not in norm_processed:
+                cp.grounded = False
+
         # Post-process mailto emails if missing from contact_points
         if mailto_emails:
             existing_emails = {cp.value.lower() for cp in intel.contact_points if cp.value}
             for email in mailto_emails:
                 if email.lower() not in existing_emails:
                     intel.contact_points.append(
-                        ContactPoint(type="Email", value=email, source_url=processed_urls[0] if processed_urls else f"https://{domain}")
+                        ContactPoint(type="Email", value=email, source_url=processed_urls[0] if processed_urls else f"https://{domain}", grounded=True)
                     )
 
         # Calculate heuristic confidence score and set final min score
