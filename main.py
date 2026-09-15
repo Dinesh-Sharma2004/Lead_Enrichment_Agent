@@ -1,7 +1,13 @@
 import asyncio
 import sys
 import json
-import pandas as pd
+import csv
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+
 from pathlib import Path
 from typing import List
 from fastapi import FastAPI, HTTPException
@@ -284,9 +290,17 @@ async def cli_main():
         row['all_processed_urls'] = ", ".join(row['all_processed_urls'])
         csv_rows.append(row)
         
-    df = pd.DataFrame(csv_rows)
-    df.to_csv("output.csv", index=False)
+    if PANDAS_AVAILABLE:
+        df = pd.DataFrame(csv_rows)
+        df.to_csv("output.csv", index=False)
+    else:
+        if csv_rows:
+            with open("output.csv", "w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=csv_rows[0].keys())
+                writer.writeheader()
+                writer.writerows(csv_rows)
     logger.info("Saved results to output.csv")
+
 
 if __name__ == "__main__":
     asyncio.run(cli_main())
