@@ -33,8 +33,11 @@ class EnrichRequest(BaseModel):
 from fastapi.responses import HTMLResponse
 
 @app.get("/", response_class=HTMLResponse)
+@app.get("/api", response_class=HTMLResponse)
+@app.get("/api/index", response_class=HTMLResponse)
 async def root():
-    return """<!DOCTYPE html>
+
+    return r"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -210,6 +213,7 @@ async def root():
 </html>"""
 
 @app.get("/api/default-domains")
+@app.get("/default-domains")
 async def get_default_domains():
     file_path = Path("domains.txt")
     if file_path.exists():
@@ -219,12 +223,15 @@ async def get_default_domains():
     return {"domains": []}
 
 @app.get("/health")
+@app.get("/api/health")
 async def health_check():
     return {"status": "ok"}
 
 
 @app.post("/enrich")
+@app.post("/api/enrich")
 async def enrich_domains_endpoint(request: EnrichRequest):
+
     if not request.domains:
         raise HTTPException(status_code=400, detail="Domain list cannot be empty")
     
