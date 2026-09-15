@@ -200,8 +200,20 @@ CRITICAL RULES:
         raw_json = response.choices[0].message.content
         data = json.loads(raw_json)
         
+        # Track token usage and estimated cost
+        prompt_tokens = response.usage.prompt_tokens if (response.usage and hasattr(response.usage, 'prompt_tokens')) else 0
+        completion_tokens = response.usage.completion_tokens if (response.usage and hasattr(response.usage, 'completion_tokens')) else 0
+        total_tokens = prompt_tokens + completion_tokens
+        
+        # Estimated cost based on Groq open-source model pricing ($0.15/1M input, $0.60/1M output)
+        estimated_cost = (prompt_tokens * 0.00000015) + (completion_tokens * 0.00000060)
+        logger.info(f"LLM Token Usage for {domain}: {prompt_tokens} prompt + {completion_tokens} completion = {total_tokens} total tokens (~${estimated_cost:.6f} USD)")
+
         normalized_data = normalize_llm_json(data, domain, processed_urls)
+        normalized_data['total_tokens_used'] = total_tokens
+        normalized_data['estimated_cost_usd'] = round(estimated_cost, 6)
         return CompanyIntelligence(**normalized_data)
+
 
     except Exception as e:
         logger.error(f"LLM Extraction exception for {domain}: {str(e)}")

@@ -30,6 +30,9 @@ class CompanyIntelligence(BaseModel):
     confidence_score: float = Field(default=0.8, description="Confidence score between 0.0 and 1.0 representing how complete and accurate the extracted data seems.")
     extraction_status: str = Field(default="Success", description="Status of the extraction, e.g., 'Success', 'Partial - Missing Leadership', etc.")
     all_processed_urls: List[str] = Field(default_factory=list, description="All URLs successfully processed during this extraction.")
+    total_tokens_used: int = Field(default=0, description="Total LLM tokens consumed for this domain extraction.")
+    estimated_cost_usd: float = Field(default=0.0, description="Estimated API cost in USD based on Groq token pricing.")
+
 
 class SerpSearchResult(BaseModel):
     name: str
