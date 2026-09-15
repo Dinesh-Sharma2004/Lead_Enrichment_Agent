@@ -1,5 +1,5 @@
-from typing import List, Optional, Any, Dict
-from pydantic import BaseModel, Field, model_validator
+from typing import List, Optional
+from pydantic import BaseModel, Field
 
 class Leader(BaseModel):
     name: str = Field(default="", description="Full name of the leader or key team member.")
@@ -27,7 +27,10 @@ class CompanyIntelligence(BaseModel):
     products_services: List[ProductOrService] = Field(default_factory=list, description="List of products or services offered.")
     contact_points: List[ContactPoint] = Field(default_factory=list, description="Public contact emails or phone numbers.")
     leadership: List[Leader] = Field(default_factory=list, description="Key leadership or team members.")
-    confidence_score: float = Field(default=0.8, description="Confidence score between 0.0 and 1.0 representing how complete and accurate the extracted data seems.")
+    llm_confidence_score: float = Field(default=0.0, description="LLM self-assessed confidence score between 0.0 and 1.0.")
+    heuristic_confidence_score: float = Field(default=0.0, description="Heuristic rule-based confidence score between 0.0 and 1.0.")
+    confidence_score: float = Field(default=0.0, description="Final confidence score (minimum of LLM and heuristic scores).")
+    confidence_rationale: str = Field(default="", description="Short rationale for the confidence assessment.")
     extraction_status: str = Field(default="Success", description="Status of the extraction, e.g., 'Success', 'Partial - Missing Leadership', etc.")
     all_processed_urls: List[str] = Field(default_factory=list, description="All URLs successfully processed during this extraction.")
     total_tokens_used: int = Field(default=0, description="Total LLM tokens consumed for this domain extraction.")
@@ -38,3 +41,4 @@ class SerpSearchResult(BaseModel):
     name: str
     role: str
     linkedin_url: Optional[str] = None
+

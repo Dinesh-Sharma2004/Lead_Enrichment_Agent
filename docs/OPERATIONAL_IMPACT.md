@@ -6,7 +6,8 @@ Manual lead enrichment across 3 to 5 subpages per company typically requires an 
 
 ### Pipeline Efficiency Benchmark
 
-- **Fully Automated (80-85% of Leads):** High confidence extractions (`confidence_score >= 0.8`) require zero manual intervention and complete in **15-20 seconds per domain**.
-- **Human-in-the-Loop Review (15-20% of Leads):** Lower confidence outputs (`confidence_score < 0.8`) or entries marked as `Missing` in `extraction_status` are flagged for quick targeted human review.
+- **Fully Automated (Estimated 80-85% of Leads):** High confidence extractions (`confidence_score >= 0.8`) require minimal manual intervention and complete in **15-20 seconds per domain**.
+- **Human-in-the-Loop Review (Estimated 15-20% of Leads):** Lower confidence outputs (`confidence_score < 0.8`) or entries marked as `Missing` in `extraction_status` are flagged for quick targeted human review.
 
-This agent delivers an estimated **80-85% reduction in manual lead research operations**.
+*Note: Automation percentages and time savings represent operational estimates subject to domain variability and anti-bot measures.*
+

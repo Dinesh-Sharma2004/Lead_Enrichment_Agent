@@ -78,11 +78,38 @@ Generated outputs:
 ## ✨ Key Features
 
 - **📊 Interactive Streamlit Web UI:** Multi-domain text input with `domains.txt` fallback and live dataset visualization.
-- **🌐 Autonomous Link Discovery:** Dynamically prioritizes key pages (`/about`, `/team`, `/pricing`, `/careers`, `/contact`).
-- **🧹 Boilerplate Cleaning:** Strips scripts, styles, nav, and footers for ~95% token savings.
-- **🛡️ Pydantic Normalization:** Pre-validates LLM JSON output to enforce exact schema compliance.
+- **🌐 Autonomous Link Discovery & Mailto Harvesting:** Dynamically prioritizes key pages (`/about`, `/team`, `/pricing`, `/careers`, `/contact`) with bounded 2nd-hop discovery and extracts mailto contacts.
+- **🧹 Boilerplate Cleaning:** Strips scripts, styles, nav, and footers for token optimization.
+- **🛡️ Schema-Enforced Tool Calling:** Direct Pydantic schema-driven function calling with Groq LLM and `repair_llm_json` safety net.
 - **🔍 Hybrid SerpAPI Enrichment:** Fallback enrichment for missing leadership names and LinkedIn profiles.
-- **⚡ Async Concurrency:** Controlled parallel domain processing via `asyncio.Semaphore`.
+- **⚡ Failure-Isolated Concurrency:** Controlled parallel domain processing via `asyncio.Semaphore` with return_exceptions=True batch isolation.
+
+---
+
+## 🛡️ Resilience & Limitations
+
+### 1. Retry & Exponential Backoff
+- **Web Navigation:** Page loading in `src/browser.py` uses a layered wait (`domcontentloaded` -> best-effort `networkidle` -> scroll -> hydration wait) wrapped in exponential backoff retries (`MAX_RETRIES` default: 2; 1s, 2s delay) for 5xx errors and network timeouts. 4xx client errors fail fast without retrying.
+- **API Rate Limiting:** Groq LLM tool calls and SerpAPI requests handle HTTP 429 rate limit responses with backoff retries respecting `Retry-After` headers.
+
+### 2. Bot-Block / Interstitial Detection
+- `is_blocked_page(html)` inspects page content for Cloudflare, Captcha, "Access Denied", and "Pardon Our Interruption" markers, and flags suspiciously short DOM text (< 200 characters).
+- **Limitation:** This is a lightweight heuristic detection mechanism; it flags blocked pages in `extraction_status` ("Blocked - Bot block detected on homepage") but does not solve interactive CAPTCHAs or bypass sophisticated anti-bot walls.
+
+### 3. Confidence Score Methodology
+- **Dual Scoring Engine:** Stores both `llm_confidence_score` (LLM self-assessed completeness and groundedness rating) and `heuristic_confidence_score` (rule-based score deducting points for missing overview, leadership, products, or contact info).
+- **Final Score:** Set to `min(llm_confidence_score, heuristic_confidence_score)` to ensure the score accurately reflects missing mandatory fields even if the LLM self-assesses optimistically.
+
+### 4. Tuning Environment Knobs (`.env`)
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `NETWORK_IDLE_TIMEOUT_MS` | `5000` | Secondary best-effort timeout for `networkidle` load state. |
+| `PAGE_HYDRATION_TIMEOUT_MS` | `1000` | Short bounded wait following scroll trigger for dynamic hydration. |
+| `MAX_RETRIES` | `2` | Maximum retry attempts for web page navigation. |
+| `TOTAL_CONTEXT_CHAR_BUDGET` | `16000` | Total character context limit split across all collected subpages. |
+| `MAX_PAGES_PER_DOMAIN` | `5` | Maximum total pages crawled per domain (homepage + subpages). |
+| `MAX_CONCURRENT_DOMAINS` | `3` | Maximum parallel domain extractions. |
+
 
 ---
 

@@ -1,6 +1,14 @@
-import re
-from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
+
+BLOCKED_MARKERS = [
+    "access denied",
+    "attention required",
+    "cloudflare",
+    "captcha",
+    "verify you are human",
+    "just a moment...",
+    "pardon our interruption"
+]
 
 def clean_html(html: str) -> str:
     """
@@ -20,8 +28,23 @@ def clean_html(html: str) -> str:
     text = soup.get_text(separator="\n")
 
     # Clean up whitespace and empty lines
-    lines = (line.strip() for line in text.splitlines())
-    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-    text = "\n".join(chunk for chunk in chunks if chunk)
-    
+    text = "\n".join(l for l in (ln.strip() for ln in text.splitlines()) if l)
     return text
+
+def is_blocked_page(html: str) -> bool:
+    """
+    Checks if an HTML string indicates a bot-blocked page or security challenge page.
+    """
+    if not html:
+        return False
+
+    html_lower = html.lower()
+    for marker in BLOCKED_MARKERS:
+        if marker in html_lower:
+            return True
+
+    text = clean_html(html)
+    if len(text) < 200:
+        return True
+
+    return False

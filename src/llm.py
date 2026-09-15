@@ -1,25 +1,26 @@
 import json
-from typing import Dict, Any, List
+import asyncio
+from typing import Dict, Any, List, Optional
 import groq
-from .schemas import CompanyIntelligence, ProductOrService, ContactPoint, Leader
+from .schemas import CompanyIntelligence, ContactPoint
 from .logger import get_logger
-from .config import GROQ_API_KEY, LLM_MODEL
+from .config import GROQ_API_KEY, LLM_MODEL, TOTAL_CONTEXT_CHAR_BUDGET
 
 logger = get_logger(__name__)
 
 
-def normalize_llm_json(raw_data: Dict[str, Any], domain: str, processed_urls: List[str]) -> Dict[str, Any]:
+def repair_llm_json(raw_data: Dict[str, Any], domain: str, processed_urls: List[str]) -> Dict[str, Any]:
     """
-    Normalizes inconsistent LLM output structures into the canonical Pydantic dict format.
+    Fallback repair function for LLM json output structures into canonical Pydantic dict format.
     Handles nested objects, title-case keys, array wrappers, and missing fields.
     """
-    normalized = {}
+    normalized: Dict[str, Any] = {}
     
-    # Lowercase / snake_case map for keys
-    key_map = {}
-    for k, v in raw_data.items():
-        clean_k = k.lower().replace(" ", "_").replace("-", "_")
-        key_map[clean_k] = v
+    key_map: Dict[str, Any] = {}
+    if isinstance(raw_data, dict):
+        for k, v in raw_data.items():
+            clean_k = str(k).lower().replace(" ", "_").replace("-", "_")
+            key_map[clean_k] = v
         
     normalized['domain'] = domain
     normalized['all_processed_urls'] = processed_urls
@@ -112,112 +113,215 @@ def normalize_llm_json(raw_data: Dict[str, Any], domain: str, processed_urls: Li
                 })
     normalized['leadership'] = leader_list
 
-    # 7. Confidence Score & Extraction Status
-    confidence = 1.0
-    missing_fields = []
-    if not normalized['company_overview']:
-        confidence -= 0.2
-        missing_fields.append('overview')
-    if not normalized['products_services']:
-        confidence -= 0.2
-        missing_fields.append('products')
-    if not normalized['leadership']:
-        confidence -= 0.3
-        missing_fields.append('leadership')
-        
-    normalized['confidence_score'] = round(max(0.1, confidence), 2)
-    if missing_fields:
-        normalized['extraction_status'] = f"Success | Missing: {', '.join(missing_fields)}"
-    else:
-        normalized['extraction_status'] = "Success - Complete"
+    # 7. LLM Confidence Score & Rationale
+    try:
+        normalized['llm_confidence_score'] = float(key_map.get('llm_confidence_score', 0.8))
+    except (ValueError, TypeError):
+        normalized['llm_confidence_score'] = 0.8
+    normalized['confidence_rationale'] = str(key_map.get('confidence_rationale', ''))
 
     return normalized
 
+# Backward compatibility alias
+normalize_llm_json = repair_llm_json
 
-async def extract_structured_data(domain: str, collected_text: Dict[str, str]) -> CompanyIntelligence:
+
+def calculate_heuristic_confidence(company_intel: Dict[str, Any]) -> float:
+    """Calculates rule-based heuristic confidence score between 0.0 and 1.0."""
+    score = 1.0
+    if not company_intel.get('company_overview'):
+        score -= 0.2
+    if not company_intel.get('products_services'):
+        score -= 0.2
+    if not company_intel.get('leadership'):
+        score -= 0.3
+    if not company_intel.get('contact_points'):
+        score -= 0.1
+    return round(max(0.0, score), 2)
+
+
+async def _call_groq_with_retry(client: groq.AsyncGroq, **kwargs: Any) -> Any:
+    """Calls Groq API with 429 rate limit backoff retry helper."""
+    max_retries = 1
+    for attempt in range(max_retries + 1):
+        try:
+            return await client.chat.completions.create(**kwargs)
+        except groq.RateLimitError as e:
+            if attempt < max_retries:
+                sleep_sec = 2.0
+                retry_after = getattr(e, 'response', None)
+                if retry_after and hasattr(retry_after, 'headers'):
+                    hdr = retry_after.headers.get("Retry-After")
+                    if hdr and hdr.isdigit():
+                        sleep_sec = float(hdr)
+                logger.warning(f"Groq API 429 Rate Limit encountered. Retrying after {sleep_sec}s (attempt {attempt + 1})...")
+                await asyncio.sleep(sleep_sec)
+            else:
+                raise
+
+
+def get_extraction_tool_schema() -> Dict[str, Any]:
+    """Generates the JSON Schema parameter definition for extract_company_intelligence tool."""
+    full_schema = CompanyIntelligence.model_json_schema()
+    excluded = {
+        "domain", "all_processed_urls", "total_tokens_used",
+        "estimated_cost_usd", "heuristic_confidence_score",
+        "confidence_score", "extraction_status"
+    }
+    props = full_schema.get("properties", {})
+    filtered_props = {k: v for k, v in props.items() if k not in excluded}
+    
+    req = full_schema.get("required", [])
+    filtered_req = [r for r in req if r not in excluded]
+
+    tool_schema: Dict[str, Any] = {
+        "type": "object",
+        "properties": filtered_props,
+    }
+    if filtered_req:
+        tool_schema["required"] = filtered_req
+    if "$defs" in full_schema:
+        tool_schema["$defs"] = full_schema["$defs"]
+    return tool_schema
+
+
+async def extract_structured_data(
+    domain: str,
+    collected_text: Dict[str, str],
+    mailto_emails: Optional[List[str]] = None
+) -> CompanyIntelligence:
     """
-    Calls Groq LLM to extract structured data based on the canonical Pydantic schema.
+    Calls Groq LLM using tool calling to extract structured company intelligence.
+    Enforces strict Pydantic schema validation with repair_llm_json as a safety fallback.
     """
     logger.info(f"Extracting structured data for {domain} using {LLM_MODEL}...")
+
+    # Calculate per-page character budget based on TOTAL_CONTEXT_CHAR_BUDGET
+    num_pages = max(1, len(collected_text))
+    per_page_budget = max(1500, TOTAL_CONTEXT_CHAR_BUDGET // num_pages)
 
     content_payload = ""
     for url, text in collected_text.items():
         if text.strip():
-            content_payload += f"\n--- SOURCE URL: {url} ---\n{text[:4000]}\n"
+            content_payload += f"\n--- SOURCE URL: {url} ---\n{text[:per_page_budget]}\n"
 
-    system_prompt = """You are a precise corporate intelligence data extractor. You output ONLY valid JSON matching this exact flat schema:
+    mailto_hint = ""
+    if mailto_emails:
+        mailto_hint = f"\nPRE-SEEDED MAILTO EMAILS FOUND: {', '.join(mailto_emails)}. Include these verbatim in `contact_points` with type 'Email' and source_url from the domain.\n"
 
-{
-  "company_name": "Official Name",
-  "company_overview": "Exactly two concise sentences describing the company.",
-  "overview_source_url": "URL where overview was found",
-  "target_audience": "Ideal customer profile or target market.",
-  "target_audience_source_url": "URL where target audience was found",
-  "products_services": [
-    {"name": "Product Name", "description": "Short description", "source_url": "URL"}
-  ],
-  "contact_points": [
-    {"type": "Email", "value": "contact@company.com", "source_url": "URL"}
-  ],
-  "leadership": [
-    {"name": "Full Name", "role": "Title", "linkedin_url": "https://linkedin.com/in/...", "source_url": "URL"}
-  ]
-}
+    system_prompt = (
+        "You are a precise corporate intelligence data extractor.\n"
+        "Assess data completeness honestly and self-assess `llm_confidence_score` (0.0 to 1.0) "
+        "and provide a short `confidence_rationale` explaining your rating (e.g. grounded overview, leadership found, contact info available).\n"
+        "Do NOT invent facts. If information is missing, leave fields empty."
+    )
 
-CRITICAL RULES:
-- `company_overview` MUST be a single string (NOT a nested object).
-- `target_audience` MUST be a single string (NOT a nested object).
-- `contact_points` MUST be a list of objects with type, value, and source_url.
-- `source_url` values MUST be chosen from the provided SOURCE URL section headers.
-- Do NOT invent information. If unknown, use empty strings or empty lists.
-"""
-
-    user_prompt = f"Extract company intelligence for {domain} from the following website text:\n{content_payload}"
-
+    user_prompt = f"Extract company intelligence for {domain} from the following website text:{mailto_hint}\n{content_payload}"
     processed_urls = list(collected_text.keys())
 
     if not GROQ_API_KEY:
         logger.error("GROQ_API_KEY environment variable is missing.")
-        fallback_data = normalize_llm_json({}, domain, processed_urls)
+        fallback_data = repair_llm_json({}, domain, processed_urls)
         fallback_data['extraction_status'] = "Failed - GROQ_API_KEY environment variable missing"
+        fallback_data['llm_confidence_score'] = 0.0
+        fallback_data['heuristic_confidence_score'] = 0.0
         fallback_data['confidence_score'] = 0.0
         return CompanyIntelligence(**fallback_data)
+
+    tool_schema = get_extraction_tool_schema()
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "extract_company_intelligence",
+                "description": "Extract structured company intelligence from website content.",
+                "parameters": tool_schema
+            }
+        }
+    ]
+    tool_choice = {"type": "function", "function": {"name": "extract_company_intelligence"}}
 
     client = groq.AsyncGroq(api_key=GROQ_API_KEY)
 
     try:
-        response = await client.chat.completions.create(
-
+        response = await _call_groq_with_retry(
+            client,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
             model=LLM_MODEL,
             temperature=0.1,
-            response_format={"type": "json_object"},
+            tools=tools,
+            tool_choice=tool_choice
         )
-        
-        raw_json = response.choices[0].message.content
-        data = json.loads(raw_json)
-        
-        # Track token usage and estimated cost
+
         prompt_tokens = response.usage.prompt_tokens if (response.usage and hasattr(response.usage, 'prompt_tokens')) else 0
         completion_tokens = response.usage.completion_tokens if (response.usage and hasattr(response.usage, 'completion_tokens')) else 0
         total_tokens = prompt_tokens + completion_tokens
-        
-        # Estimated cost based on Groq open-source model pricing ($0.15/1M input, $0.60/1M output)
         estimated_cost = (prompt_tokens * 0.00000015) + (completion_tokens * 0.00000060)
         logger.info(f"LLM Token Usage for {domain}: {prompt_tokens} prompt + {completion_tokens} completion = {total_tokens} total tokens (~${estimated_cost:.6f} USD)")
 
-        normalized_data = normalize_llm_json(data, domain, processed_urls)
-        normalized_data['total_tokens_used'] = total_tokens
-        normalized_data['estimated_cost_usd'] = round(estimated_cost, 6)
-        return CompanyIntelligence(**normalized_data)
+        # Parse tool arguments
+        raw_data: Dict[str, Any] = {}
+        tool_calls = response.choices[0].message.tool_calls
+        if tool_calls and len(tool_calls) > 0:
+            arguments_str = tool_calls[0].function.arguments
+            raw_data = json.loads(arguments_str)
 
+        raw_data['domain'] = domain
+        raw_data['all_processed_urls'] = processed_urls
+        raw_data['total_tokens_used'] = total_tokens
+        raw_data['estimated_cost_usd'] = round(estimated_cost, 6)
+
+        try:
+            intel = CompanyIntelligence(**raw_data)
+            logger.info(f"Strict Pydantic schema validation succeeded for {domain}.")
+        except Exception as val_err:
+            logger.warning(f"Strict Pydantic validation failed for {domain} ({val_err}). Falling back to repair_llm_json.")
+            repaired = repair_llm_json(raw_data, domain, processed_urls)
+            repaired['total_tokens_used'] = total_tokens
+            repaired['estimated_cost_usd'] = round(estimated_cost, 6)
+            intel = CompanyIntelligence(**repaired)
+
+        # Post-process mailto emails if missing from contact_points
+        if mailto_emails:
+            existing_emails = {cp.value.lower() for cp in intel.contact_points if cp.value}
+            for email in mailto_emails:
+                if email.lower() not in existing_emails:
+                    intel.contact_points.append(
+                        ContactPoint(type="Email", value=email, source_url=processed_urls[0] if processed_urls else f"https://{domain}")
+                    )
+
+        # Calculate heuristic confidence score and set final min score
+        h_score = calculate_heuristic_confidence(intel.model_dump())
+        l_score = intel.llm_confidence_score if intel.llm_confidence_score > 0 else 0.8
+        
+        intel.heuristic_confidence_score = h_score
+        intel.llm_confidence_score = l_score
+        intel.confidence_score = round(min(l_score, h_score), 2)
+        
+        if not intel.extraction_status or intel.extraction_status == "Success":
+            missing = []
+            if not intel.company_overview:
+                missing.append("overview")
+            if not intel.products_services:
+                missing.append("products")
+            if not intel.leadership:
+                missing.append("leadership")
+            if missing:
+                intel.extraction_status = f"Success | Missing: {', '.join(missing)}"
+            else:
+                intel.extraction_status = "Success - Complete"
+
+        return intel
 
     except Exception as e:
         logger.error(f"LLM Extraction exception for {domain}: {str(e)}")
-        fallback_data = normalize_llm_json({}, domain, processed_urls)
+        fallback_data = repair_llm_json({}, domain, processed_urls)
         fallback_data['extraction_status'] = f"Partial Fallback - {str(e)}"
+        fallback_data['llm_confidence_score'] = 0.0
+        fallback_data['heuristic_confidence_score'] = 0.0
         fallback_data['confidence_score'] = 0.0
         return CompanyIntelligence(**fallback_data)
+

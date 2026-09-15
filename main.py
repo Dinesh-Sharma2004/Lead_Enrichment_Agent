@@ -31,9 +31,28 @@ async def main():
     tasks = [process_domain(domain, browser_manager) for domain in domains]
     
     try:
-        results = await asyncio.gather(*tasks)
+        raw_results = await asyncio.gather(*tasks, return_exceptions=True)
     finally:
         await browser_manager.stop()
+
+    results = []
+    from src.schemas import CompanyIntelligence
+    for domain, res in zip(domains, raw_results):
+        if isinstance(res, Exception):
+            logger.error(f"Unhandled exception processing domain {domain}: {res}")
+            fallback = CompanyIntelligence(
+                domain=domain,
+                company_name=domain.split('.')[0].capitalize(),
+                company_overview="",
+                extraction_status=f"Failed - Unhandled exception: {res}",
+                confidence_score=0.0,
+                llm_confidence_score=0.0,
+                heuristic_confidence_score=0.0
+            )
+            results.append(fallback)
+        else:
+            results.append(res)
+
 
     # Save to JSON
     json_data = [res.model_dump() for res in results]

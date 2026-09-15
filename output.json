@@ -1,200 +1,291 @@
 [
   {
-    "domain": "google.com",
-    "company_name": "Google",
-    "company_overview": "",
-    "overview_source_url": "",
-    "target_audience": "",
-    "target_audience_source_url": "",
-    "products_services": [],
-    "contact_points": [],
-    "leadership": [
-      {
-        "name": "Sundar Pichai",
-        "role": "CEO at Google",
-        "linkedin_url": "https://www.linkedin.com/in/sundarpichai",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Eric Schmidt",
-        "role": "Chair and CEO of Relativity Space",
-        "linkedin_url": "https://www.linkedin.com/in/eric-e-schmidt",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Thomas Kurian",
-        "role": "CEO at Google Cloud",
-        "linkedin_url": "https://www.linkedin.com/in/thomas-kurian-469b6219",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Dan Sandlin",
-        "role": "Managing Director @ Google | Global Scale ...",
-        "linkedin_url": "https://www.linkedin.com/in/dansandlin",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Roma Datta Chobey",
-        "role": "Managing Director at Google India.",
-        "linkedin_url": "https://in.linkedin.com/in/roma-datta-chobey-8474bb31",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Melanie Silva",
-        "role": "Managing Director and VP, Google ...",
-        "linkedin_url": "https://au.linkedin.com/in/melspiteri",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Sharen Phillips",
-        "role": "COO | Google Director | Board Chair",
-        "linkedin_url": "https://www.linkedin.com/in/sharenphillips",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Pablo Rodriguez, PhD",
-        "role": "Google Director, Office of the CTO",
-        "linkedin_url": "https://www.linkedin.com/in/pablorr",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Jeff Cox",
-        "role": "Senior Director Of Engineering at Google",
-        "linkedin_url": "https://www.linkedin.com/in/jeffcox77",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Ann Marie Clements",
-        "role": "Google, Director of Communications",
-        "linkedin_url": "https://www.linkedin.com/in/ann-marie-clements-934498a",
-        "source_url": "SerpAPI Search"
-      }
-    ],
-    "confidence_score": 0.2,
-    "extraction_status": "Success | Missing: overview, products, leadership | Leadership enriched via SerpAPI",
-    "all_processed_urls": [
-      "https://www.google.com/",
-      "https://www.google.com/advanced_search?hl=en-IN&fg=1",
-      "https://www.google.com/history/optout?hl=en-IN&fg=1&nzb=1",
-      "https://myaccount.google.com/intro/yourdata/search?utm_source=googlemenu&fg=1&cctld=com",
-      "https://www.google.com/imghp?hl=en&ogbl"
-    ]
-  },
-  {
-    "domain": "stripe.com",
-    "company_name": "Stripe",
-    "company_overview": "Stripe is a technology company that builds programmable financial infrastructure to make it easier and cheaper for any business to start and scale. It powers payments and financial services for over 5\u202fmillion businesses, processing trillions of dollars annually.",
-    "overview_source_url": "https://stripe.com/in/about",
-    "target_audience": "Businesses of all sizes, from solo founders to large enterprises, seeking payment processing, financial services, and embedded commerce solutions.",
-    "target_audience_source_url": "https://stripe.com/in/about",
+    "domain": "postman.com",
+    "company_name": "Postman",
+    "company_overview": "Postman is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streams collaboration so you can create better APIs\u2014faster.",
+    "overview_source_url": "https://www.postman.com/company/about-postman/",
+    "target_audience": "Engineers and organizations that build, test, manage, and distribute APIs at scale.",
+    "target_audience_source_url": "https://www.postman.com/company/about-postman/",
     "products_services": [
       {
-        "name": "Payments",
-        "description": "Core payment processing for online and in\u2011person transactions across 135+ currencies.",
-        "source_url": "https://stripe.com/in"
+        "name": "Postman API Platform",
+        "description": "",
+        "source_url": ""
       },
       {
-        "name": "Billing",
-        "description": "Recurring billing and subscription management tools.",
-        "source_url": "https://stripe.com/in"
+        "name": "Postman AI Engineer",
+        "description": "",
+        "source_url": ""
       },
       {
-        "name": "Connect",
-        "description": "Platform solution for marketplaces to route payments to multiple parties.",
-        "source_url": "https://stripe.com/in"
+        "name": "Desktop App",
+        "description": "",
+        "source_url": ""
       },
       {
-        "name": "Radar",
-        "description": "AI\u2011powered fraud detection and prevention.",
-        "source_url": "https://stripe.com/in"
+        "name": "API Testing",
+        "description": "",
+        "source_url": ""
       },
       {
-        "name": "Sigma",
-        "description": "Analytics and reporting for financial data.",
-        "source_url": "https://stripe.com/in"
+        "name": "API Management",
+        "description": "",
+        "source_url": ""
       },
       {
-        "name": "Issuing",
-        "description": "Create and manage virtual and physical cards for businesses.",
-        "source_url": "https://stripe.com/in"
-      },
-      {
-        "name": "Terminal",
-        "description": "In\u2011store point\u2011of\u2011sale hardware and software integration.",
-        "source_url": "https://stripe.com/in"
+        "name": "API Distribution",
+        "description": "",
+        "source_url": ""
       }
     ],
-    "contact_points": [],
+    "contact_points": [
+      {
+        "type": "Email",
+        "value": "help@postman.com",
+        "source_url": "https://www.postman.com"
+      },
+      {
+        "type": "Email",
+        "value": "accommodations@postman.com",
+        "source_url": "https://www.postman.com"
+      },
+      {
+        "type": "Email",
+        "value": "info-jp@postman.com",
+        "source_url": "https://www.postman.com"
+      },
+      {
+        "type": "Email",
+        "value": "info@postman.com",
+        "source_url": "https://www.postman.com"
+      },
+      {
+        "type": "Phone",
+        "value": "(888) 616-1665",
+        "source_url": "https://www.postman.com/company/contact-sales/"
+      },
+      {
+        "type": "Phone",
+        "value": "+1 415 796 6470",
+        "source_url": "https://www.postman.com/company/contact-us/"
+      },
+      {
+        "type": "Phone",
+        "value": "+81-3-6843-3777",
+        "source_url": "https://www.postman.com/company/contact-us/"
+      }
+    ],
     "leadership": [
       {
-        "name": "Patrick Collison",
-        "role": "Stripe CEO",
-        "linkedin_url": "https://www.linkedin.com/in/patrickcollison",
-        "source_url": "SerpAPI Search"
+        "name": "Abhinav Asthana",
+        "role": "",
+        "linkedin_url": null,
+        "source_url": ""
       },
       {
-        "name": "John Collison",
-        "role": "President at Stripe",
-        "linkedin_url": "https://www.linkedin.com/in/johnbcollison",
-        "source_url": "SerpAPI Search"
+        "name": "Ankit Sobti",
+        "role": "",
+        "linkedin_url": null,
+        "source_url": ""
       },
       {
-        "name": "Claire Hughes Johnson",
-        "role": "United States | Professional Profile",
-        "linkedin_url": "https://www.linkedin.com/in/claire-hughes-johnson-7058",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Chris Conley",
-        "role": "Engineer and founder | Ex",
-        "linkedin_url": "https://www.linkedin.com/in/chrismconley",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "William Gaybrick",
-        "role": "President, Technology and Business at ...",
-        "linkedin_url": "https://www.linkedin.com/in/william-gaybrick-5730347",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Manish Maheshwari",
-        "role": "Country Business Head, India@Stripe",
-        "linkedin_url": "https://in.linkedin.com/in/manishlens",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "George Xing",
-        "role": "AI & data products @ Stripe, Founder ...",
-        "linkedin_url": "https://www.linkedin.com/in/georgexing",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Jeff Titterton",
-        "role": "San Francisco, California, United States",
-        "linkedin_url": "https://www.linkedin.com/in/jefftitterton",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Rajeev Rajan",
-        "role": "Business Lead at Stripe",
-        "linkedin_url": "https://www.linkedin.com/in/rajeev-rajan",
-        "source_url": "SerpAPI Search"
-      },
-      {
-        "name": "Dylan Meagher",
-        "role": "Account Executive @ Stripe",
-        "linkedin_url": "https://www.linkedin.com/in/dylan-meagher-17742b194",
-        "source_url": "SerpAPI Search"
+        "name": "Abhijit Kane",
+        "role": "",
+        "linkedin_url": null,
+        "source_url": ""
       }
     ],
-    "confidence_score": 0.6,
-    "extraction_status": "Success | Missing: leadership | Leadership enriched via SerpAPI",
+    "llm_confidence_score": 0.93,
+    "heuristic_confidence_score": 1.0,
+    "confidence_score": 0.93,
+    "confidence_rationale": "Key overview, leadership, contact emails/phones, and product list are directly extracted from official pages; minor gaps in exhaustive product catalog.",
+    "extraction_status": "Blocked - Bot block detected on homepage | Success - Complete",
     "all_processed_urls": [
-      "https://stripe.com/in",
-      "https://stripe.com/in/about",
-      "https://stripe.com/in/careers",
-      "https://stripe.com/in/contact/sales",
-      "https://stripe.com/in/pricing"
-    ]
+      "https://www.postman.com/",
+      "https://www.postman.com/company/about-postman/",
+      "https://www.postman.com/company/careers/",
+      "https://www.postman.com/company/contact-sales/",
+      "https://www.postman.com/company/contact-us/"
+    ],
+    "total_tokens_used": 4359,
+    "estimated_cost_usd": 0.001123
+  },
+  {
+    "domain": "supabase.com",
+    "company_name": "Supabase",
+    "company_overview": "Supabase is the Postgres development platform, built by developers for developers. Supabase adds auth, realtime, storage, RESTful APIs, and edge functions.",
+    "overview_source_url": "https://supabase.com/",
+    "target_audience": "Developers and product teams building applications, from startups to enterprises, who need a scalable backend platform with database, authentication, realtime, and storage capabilities.",
+    "target_audience_source_url": "https://supabase.com/",
+    "products_services": [
+      {
+        "name": "Postgres Database",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Auth with Row Level Security",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Realtime",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Storage",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Edge Functions",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Vector Search",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Data APIs (RESTful)",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "OpenAI Integration",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Hugging Face Integration",
+        "description": "",
+        "source_url": ""
+      }
+    ],
+    "contact_points": [
+      {
+        "type": "Email",
+        "value": "help-events@supabase.com",
+        "source_url": "https://supabase.com"
+      },
+      {
+        "type": "Email",
+        "value": "security@supabase.com",
+        "source_url": "https://supabase.com"
+      },
+      {
+        "type": "Email",
+        "value": "abuse@supabase.com",
+        "source_url": "https://supabase.com"
+      },
+      {
+        "type": "Email",
+        "value": "privacy@supabase.com",
+        "source_url": "https://supabase.com"
+      },
+      {
+        "type": "Email",
+        "value": "legal@supabase.com",
+        "source_url": "https://supabase.com"
+      }
+    ],
+    "leadership": [
+      {
+        "name": "Tracy Lane",
+        "role": "",
+        "linkedin_url": null,
+        "source_url": "https://supabase.com/contact-us"
+      }
+    ],
+    "llm_confidence_score": 0.85,
+    "heuristic_confidence_score": 1.0,
+    "confidence_score": 0.85,
+    "confidence_rationale": "Overview, contact emails, and core product list are directly extracted; leadership limited to publicly listed General Counsel; target audience inferred from site messaging.",
+    "extraction_status": "Success - Complete",
+    "all_processed_urls": [
+      "https://supabase.com/",
+      "https://supabase.com/careers",
+      "https://supabase.com/company",
+      "https://supabase.com/contact-us",
+      "https://supabase.com/contact/sales"
+    ],
+    "total_tokens_used": 5099,
+    "estimated_cost_usd": 0.001244
+  },
+  {
+    "domain": "vapi.ai",
+    "company_name": "Vapi",
+    "company_overview": "Vapi provides a platform for building, deploying, and managing advanced voice AI agents that can handle tasks such as lead qualification, customer support, and appointment scheduling. The solution offers enterprise\u2011grade features like real\u2011time monitoring, scalability, compliance, and integrated telephony.",
+    "overview_source_url": "https://vapi.ai/",
+    "target_audience": "Enterprises and developers building voice\u2011first applications, including Fortune 100 companies, startups, and teams needing scalable, compliant voice AI agents.",
+    "target_audience_source_url": "https://vapi.ai/",
+    "products_services": [
+      {
+        "name": "Voice AI Agent Platform",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Lead Qualification Agent",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Customer Support Agent",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Appointment Scheduling Agent",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Enterprise Telephony Integration",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "AI Guardrails & Compliance (SOC 2, HIPAA, PCI)",
+        "description": "",
+        "source_url": ""
+      },
+      {
+        "name": "Real\u2011time Monitoring & Analytics",
+        "description": "",
+        "source_url": ""
+      }
+    ],
+    "contact_points": [
+      {
+        "type": "Email",
+        "value": "Talent@vapi.ai",
+        "source_url": "https://vapi.ai/"
+      }
+    ],
+    "leadership": [
+      {
+        "name": "Jason Mitura",
+        "role": "",
+        "linkedin_url": null,
+        "source_url": "https://vapi.ai/"
+      }
+    ],
+    "llm_confidence_score": 0.86,
+    "heuristic_confidence_score": 1.0,
+    "confidence_score": 0.86,
+    "confidence_rationale": "Overview derived from homepage content; leadership identified from a quoted VP; contact email explicitly listed; product list inferred from site sections; target audience described in enterprise messaging.",
+    "extraction_status": "Success - Complete",
+    "all_processed_urls": [
+      "https://vapi.ai/",
+      "https://vapi.ai/careers",
+      "https://vapi.ai/pricing",
+      "https://dashboard.vapi.ai/login",
+      "https://dashboard.vapi.ai/register"
+    ],
+    "total_tokens_used": 3696,
+    "estimated_cost_usd": 0.000936
   }
 ]

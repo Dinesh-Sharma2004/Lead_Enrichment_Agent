@@ -1,12 +1,12 @@
 import asyncio
 import json
-import os
 from pathlib import Path
 import pandas as pd
 import streamlit as st
 
 from src.browser import BrowserManager
 from src.agent import process_domain
+from src.schemas import CompanyIntelligence
 from src.config import MAX_CONCURRENT_DOMAINS
 
 # Set Streamlit Page Configuration
@@ -87,10 +87,26 @@ async def run_enrichment(domains_list: list[str], concurrency: int):
     await browser_manager.start()
     try:
         tasks = [process_domain(domain, browser_manager) for domain in domains_list]
-        results = await asyncio.gather(*tasks)
+        raw_results = await asyncio.gather(*tasks, return_exceptions=True)
+        results = []
+        for domain, res in zip(domains_list, raw_results):
+            if isinstance(res, Exception):
+                fallback = CompanyIntelligence(
+                    domain=domain,
+                    company_name=domain.split('.')[0].capitalize(),
+                    company_overview="",
+                    extraction_status=f"Failed - Unhandled exception: {res}",
+                    confidence_score=0.0,
+                    llm_confidence_score=0.0,
+                    heuristic_confidence_score=0.0
+                )
+                results.append(fallback)
+            else:
+                results.append(res)
         return results
     finally:
         await browser_manager.stop()
+
 
 if search_button:
     raw_domains = user_input.strip()

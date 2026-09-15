@@ -1,8 +1,8 @@
 import re
 from urllib.parse import urljoin, urlparse
+from typing import List, Tuple
 from bs4 import BeautifulSoup
 
-# Heuristics for important pages
 RELEVANT_PATH_PATTERNS = [
     r'/about',
     r'/company',
@@ -16,35 +16,57 @@ RELEVANT_PATH_PATTERNS = [
     r'/career'
 ]
 
-def discover_links(base_url: str, html: str) -> list[str]:
+def discover_links(base_url: str, html: str) -> Tuple[List[str], List[str]]:
     """
-    Extracts and prioritizes internal links from the HTML content.
-    Returns a sorted list of unique URLs.
+    Extracts internal page links and mailto email addresses from HTML content.
+    Returns a tuple of (prioritized_page_links, mailto_emails).
     """
     if not html:
-        return []
+        return [], []
 
     soup = BeautifulSoup(html, "html.parser")
-    base_domain = urlparse(base_url).netloc
+
+
+    base_parsed = urlparse(base_url)
+    base_domain = base_parsed.netloc
 
     links = set()
+    mailto_emails = set()
+
     for a_tag in soup.find_all("a", href=True):
         href = a_tag["href"].strip()
-        if not href or href.startswith(('javascript:', 'mailto:', 'tel:')):
+        if not href:
+            continue
+
+        if href.lower().startswith('mailto:'):
+            email = href[7:].split('?')[0].strip()
+            if '@' in email and '.' in email.split('@')[-1]:
+                mailto_emails.add(email)
+            continue
+
+        if href.startswith(('javascript:', 'tel:')):
             continue
 
         full_url = urljoin(base_url, href)
         parsed_url = urlparse(full_url)
         
-        # Only keep internal links (same domain)
-        if parsed_url.netloc == base_domain or parsed_url.netloc == "":
-            # Normalize URL by removing fragments
-            clean_url = f"{parsed_url.scheme}://{base_domain}{parsed_url.path}"
+        target_netloc = parsed_url.netloc if parsed_url.netloc else base_domain
+
+        # Check if internal domain or subdomain
+        is_internal = False
+        if target_netloc == base_domain:
+            is_internal = True
+        elif target_netloc.endswith('.' + base_domain) or base_domain.endswith('.' + target_netloc):
+            is_internal = True
+        elif target_netloc == "":
+            is_internal = True
+
+        if is_internal and parsed_url.scheme in ('http', 'https'):
+            clean_url = f"{parsed_url.scheme}://{target_netloc}{parsed_url.path}"
             if parsed_url.query:
                 clean_url += f"?{parsed_url.query}"
             links.add(clean_url)
 
-    # Prioritize links based on heuristics
     prioritized = []
     others = []
 
@@ -55,5 +77,5 @@ def discover_links(base_url: str, html: str) -> list[str]:
         else:
             others.append(link)
 
-    # Return prioritized links first
-    return sorted(prioritized) + sorted(others)
+    page_links = sorted(prioritized) + sorted(others)
+    return page_links, sorted(list(mailto_emails))
