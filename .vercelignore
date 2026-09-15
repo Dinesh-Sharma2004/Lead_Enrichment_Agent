@@ -9,3 +9,5 @@ walkthrough_script.md
 output.json
 output.csv
 .env
+app.py
+requirements-dev.txt

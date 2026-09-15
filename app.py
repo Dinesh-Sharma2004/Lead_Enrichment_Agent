@@ -2,8 +2,18 @@ import asyncio
 import json
 import os
 from pathlib import Path
-import pandas as pd
-import streamlit as st
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+
+try:
+    import streamlit as st
+    STREAMLIT_AVAILABLE = True
+except ImportError:
+    STREAMLIT_AVAILABLE = False
+
 
 from src.browser import BrowserManager
 from src.agent import process_domain
@@ -200,6 +210,4 @@ if search_button:
             except Exception as e:
                 st.error(f"❌ Error during lead enrichment: {str(e)}")
 
-# Export FastAPI app instance for Vercel serverless entrypoint discovery
-from main import app as app
 
