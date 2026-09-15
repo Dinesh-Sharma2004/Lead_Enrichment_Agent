@@ -14,31 +14,21 @@ All runtime settings and API credentials are managed using environment variables
 | `TIMEOUT_SECONDS` | `30` | **No** | Per-page navigation timeout in seconds. |
 | `LLM_MODEL` | `openai/gpt-oss-120b` | **No** | Groq LLM model name. |
 
-## Deployment Configurations
+## Application Modes
 
-### 1. Vercel Configuration (`vercel.json`)
-The repository includes pre-configured routing for Vercel Serverless Functions:
-```json
-{
-  "version": 2,
-  "builds": [
-    { "src": "main.py", "use": "@vercel/python" },
-    { "src": "app.py", "use": "@vercel/python" }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "main.py" },
-    { "src": "/(.*)", "dest": "app.py" }
-  ]
-}
-```
-
-### 2. Streamlit Web UI Configuration
+### 1. Streamlit Web UI
 Launch the interactive Streamlit dashboard:
 ```bash
 streamlit run app.py
 ```
 - **Custom input:** Pass domains via the multi-line text input.
 - **Default fallback:** Leaving the input empty defaults to reading `domains.txt`.
+
+### 2. Command Line Interface (CLI)
+Run batch domain processing from terminal:
+```bash
+python main.py domains.txt
+```
 
 ## Concurrency & Performance Tuning
 

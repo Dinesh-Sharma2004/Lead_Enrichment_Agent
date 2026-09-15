@@ -2,18 +2,8 @@ import asyncio
 import json
 import os
 from pathlib import Path
-try:
-    import pandas as pd
-    PANDAS_AVAILABLE = True
-except ImportError:
-    PANDAS_AVAILABLE = False
-
-try:
-    import streamlit as st
-    STREAMLIT_AVAILABLE = True
-except ImportError:
-    STREAMLIT_AVAILABLE = False
-
+import pandas as pd
+import streamlit as st
 
 from src.browser import BrowserManager
 from src.agent import process_domain
@@ -103,21 +93,17 @@ async def run_enrichment(domains_list: list[str], concurrency: int):
         await browser_manager.stop()
 
 if search_button:
-    # Determine domains list
     raw_domains = user_input.strip()
     target_domains = []
     
     if raw_domains:
-        # Split by newline or comma
         raw_list = [d.strip() for d in raw_domains.replace(',', '\n').split('\n') if d.strip()]
-        # Clean domain names (remove http:// or https:// if present)
         for d in raw_list:
             clean_d = d.replace('https://', '').replace('http://', '').split('/')[0].strip()
             if clean_d and clean_d not in target_domains:
                 target_domains.append(clean_d)
         st.info(f"📋 Processing **{len(target_domains)}** custom domain(s): `{', '.join(target_domains)}`")
     else:
-        # Fall back to default domains.txt
         if default_domains_list:
             target_domains = default_domains_list
             st.info(f"ℹ️ No domains entered. Using **{len(target_domains)}** default domain(s) from `domains.txt`: `{', '.join(target_domains)}`")
@@ -209,5 +195,3 @@ if search_button:
 
             except Exception as e:
                 st.error(f"❌ Error during lead enrichment: {str(e)}")
-
-
