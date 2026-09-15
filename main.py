@@ -45,16 +45,24 @@ async def enrich_domains_endpoint(request: EnrichRequest):
     if not request.domains:
         raise HTTPException(status_code=400, detail="Domain list cannot be empty")
     
-    browser_manager = BrowserManager(max_concurrent=MAX_CONCURRENT_DOMAINS)
-    await browser_manager.start()
-    
     try:
-        tasks = [process_domain(d, browser_manager) for d in request.domains]
-        results = await asyncio.gather(*tasks)
-    finally:
-        await browser_manager.stop()
+        browser_manager = BrowserManager(max_concurrent=MAX_CONCURRENT_DOMAINS)
+        await browser_manager.start()
         
-    return [res.model_dump() for res in results]
+        try:
+            tasks = [process_domain(d, browser_manager) for d in request.domains]
+            results = await asyncio.gather(*tasks)
+        finally:
+            await browser_manager.stop()
+            
+        return [res.model_dump() for res in results]
+    except Exception as e:
+        logger.error(f"Error executing enrichment: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Enrichment failed: {str(e)}. Note: Playwright Chromium requires system browser dependencies."
+        )
+
 
 async def cli_main():
     if len(sys.argv) < 2:
