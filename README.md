@@ -1,11 +1,10 @@
 <div align="center">
 
-# 🤖 Autonomous Lead Enrichment Agent
+#  Autonomous Lead Enrichment Agent
 
 **An asynchronous, evidence-grounded corporate intelligence engine with Streamlit Web UI, Playwright web automation, BeautifulSoup content cleaning, Groq LLMs, and SerpAPI enrichment.**
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-v1.31-red.svg)](https://streamlit.io/)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium-green.svg)](https://playwright.dev/python/)
 [![Groq API](https://img.shields.io/badge/Groq-openai%2Fgpt--oss--120b-orange.svg)](https://groq.com/)
 [![SerpAPI](https://img.shields.io/badge/SerpAPI-Search--Enrichment-purple.svg)](https://serpapi.com/)
@@ -15,14 +14,13 @@
 
 ---
 
-## 📌 Overview
+##  Overview
 
 The **Autonomous Lead Enrichment Agent** accepts company domains, autonomously navigates their websites via headless Chromium, discovers relevant subpages (About, Team, Products, Pricing, Careers, Contact), extracts cleaned DOM content, and leverages Groq LLMs to produce structured, evidence-grounded corporate intelligence.
 
 If key information (such as leadership) is missing from the website, the agent conditionally triggers external searches via **SerpAPI**, validating search results before merging.
 
 ### Interfaces
-- **🖥️ Streamlit Web App (`app.py`):** Interactive UI for custom domain input, fallback to `domains.txt`, dynamic data visualization, and instant JSON/CSV downloads.
 - **💻 Command-Line Interface (`main.py domains.txt`):** Batch CLI processing with `output.json` and `output.csv` export.
 
 ---
@@ -54,17 +52,8 @@ SERPAPI_API_KEY=your_serpapi_api_key_here
 ENABLE_SERPAPI=True
 ```
 
-### 3. Execution Options
 
-#### Option A: Streamlit Web UI (Interactive)
-```bash
-streamlit run app.py
-```
-- Enter target domains in the text area (e.g. `stripe.com`, `supabase.com`).
-- If left empty, clicking **Start Lead Enrichment** automatically uses default domains from `domains.txt`.
-- View interactive metrics, tables, and download JSON/CSV files.
-
-#### Option B: Command Line Interface (CLI)
+####  Command Line Interface (CLI) Execution
 ```bash
 python main.py domains.txt
 ```
@@ -75,7 +64,7 @@ Generated outputs:
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 - **📊 Interactive Streamlit Web UI:** Multi-domain text input with `domains.txt` fallback and live dataset visualization.
 - **🌐 Autonomous Link Discovery & Mailto Harvesting:** Dynamically prioritizes key pages (`/about`, `/team`, `/pricing`, `/careers`, `/contact`) with bounded 2nd-hop discovery and extracts mailto contacts.
@@ -86,7 +75,7 @@ Generated outputs:
 
 ---
 
-## 🛡️ Resilience & Limitations
+##  Resilience & Limitations
 
 ### 1. Retry & Exponential Backoff
 - **Web Navigation:** Page loading in `src/browser.py` uses a layered wait (`domcontentloaded` -> best-effort `networkidle` -> scroll -> hydration wait) wrapped in exponential backoff retries (`MAX_RETRIES` default: 2; 1s, 2s delay) for 5xx errors and network timeouts. 4xx client errors fail fast without retrying.
@@ -117,7 +106,7 @@ Generated outputs:
 
 ---
 
-## 📚 Project Documentation
+##  Project Documentation
 
 Detailed documentation is available in the [`docs/`](./docs/) directory:
 
@@ -129,7 +118,7 @@ Detailed documentation is available in the [`docs/`](./docs/) directory:
 
 ---
 
-## 🧪 Running Unit Tests
+##  Running Unit Tests
 
 ```bash
 pytest tests/
@@ -137,7 +126,7 @@ pytest tests/
 
 ---
 
-## 📂 Repository Structure
+##  Repository Structure
 
 ```text
 Lead_Enrichment_Agent/
