@@ -25,3 +25,8 @@ def test_default_domains_endpoint():
 def test_enrich_validation_error():
     response = client.post("/enrich", json={"domains": []})
     assert response.status_code == 400
+
+def test_favicon_endpoint():
+    response = client.get("/favicon.ico")
+    assert response.status_code == 204
+

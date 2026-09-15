@@ -27,10 +27,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
+from fastapi import FastAPI, HTTPException, Response
+from fastapi.responses import HTMLResponse
+
 class EnrichRequest(BaseModel):
     domains: List[str]
 
-from fastapi.responses import HTMLResponse
+@app.get("/favicon.ico", include_in_schema=False)
+@app.get("/api/favicon.ico", include_in_schema=False)
+async def favicon():
+    return Response(status_code=204)
+
+
 
 @app.get("/", response_class=HTMLResponse)
 @app.get("/api", response_class=HTMLResponse)
