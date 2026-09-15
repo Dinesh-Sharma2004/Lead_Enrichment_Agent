@@ -8,8 +8,9 @@ logger = get_logger(__name__)
 try:
     from playwright.async_api import async_playwright, Page, BrowserContext
     PLAYWRIGHT_AVAILABLE = True
-except ImportError:
+except Exception:
     PLAYWRIGHT_AVAILABLE = False
+
 
 class BrowserManager:
     def __init__(self, max_concurrent: int = 3, timeout_seconds: int = 30):
