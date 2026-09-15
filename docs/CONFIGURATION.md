@@ -11,8 +11,34 @@ All runtime settings and API credentials are managed using environment variables
 | `ENABLE_SERPAPI` | `True` | **No** | Toggle external search fallback (`True`/`False`). |
 | `MAX_CONCURRENT_DOMAINS` | `3` | **No** | Number of domains processed concurrently in parallel. |
 | `MAX_PAGES_PER_DOMAIN` | `5` | **No** | Maximum subpages navigated per domain (Homepage + 4). |
-| `TIMEOUT_SECONDS` | `30` | **No** | Per-page Playwright navigation timeout in seconds. |
+| `TIMEOUT_SECONDS` | `30` | **No** | Per-page navigation timeout in seconds. |
 | `LLM_MODEL` | `openai/gpt-oss-120b` | **No** | Groq LLM model name. |
+
+## Deployment Configurations
+
+### 1. Vercel Configuration (`vercel.json`)
+The repository includes pre-configured routing for Vercel Serverless Functions:
+```json
+{
+  "version": 2,
+  "builds": [
+    { "src": "main.py", "use": "@vercel/python" },
+    { "src": "app.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "main.py" },
+    { "src": "/(.*)", "dest": "app.py" }
+  ]
+}
+```
+
+### 2. Streamlit Web UI Configuration
+Launch the interactive Streamlit dashboard:
+```bash
+streamlit run app.py
+```
+- **Custom input:** Pass domains via the multi-line text input.
+- **Default fallback:** Leaving the input empty defaults to reading `domains.txt`.
 
 ## Concurrency & Performance Tuning
 
