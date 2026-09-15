@@ -7,7 +7,6 @@ from .config import GROQ_API_KEY, LLM_MODEL
 
 logger = get_logger(__name__)
 
-client = groq.AsyncGroq(api_key=GROQ_API_KEY)
 
 def normalize_llm_json(raw_data: Dict[str, Any], domain: str, processed_urls: List[str]) -> Dict[str, Any]:
     """
@@ -177,8 +176,18 @@ CRITICAL RULES:
 
     processed_urls = list(collected_text.keys())
 
+    if not GROQ_API_KEY:
+        logger.error("GROQ_API_KEY environment variable is missing.")
+        fallback_data = normalize_llm_json({}, domain, processed_urls)
+        fallback_data['extraction_status'] = "Failed - GROQ_API_KEY environment variable missing"
+        fallback_data['confidence_score'] = 0.0
+        return CompanyIntelligence(**fallback_data)
+
+    client = groq.AsyncGroq(api_key=GROQ_API_KEY)
+
     try:
         response = await client.chat.completions.create(
+
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
