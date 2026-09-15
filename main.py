@@ -3,6 +3,10 @@ import sys
 import json
 import pandas as pd
 from pathlib import Path
+from typing import List
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
 from src.browser import BrowserManager
 from src.agent import process_domain
 from src.logger import get_logger
@@ -10,7 +14,49 @@ from src.config import MAX_CONCURRENT_DOMAINS
 
 logger = get_logger("main")
 
-async def main():
+# Top-level FastAPI application instance exported for Vercel serverless deployment
+app = FastAPI(
+    title="Autonomous Lead Enrichment Agent API",
+    description="Asynchronous corporate intelligence engine API",
+    version="1.0.0"
+)
+
+class EnrichRequest(BaseModel):
+    domains: List[str]
+
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "service": "Autonomous Lead Enrichment Agent API",
+        "version": "1.0.0",
+        "endpoints": {
+            "health": "/health",
+            "enrich": "POST /enrich"
+        }
+    }
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+@app.post("/enrich")
+async def enrich_domains_endpoint(request: EnrichRequest):
+    if not request.domains:
+        raise HTTPException(status_code=400, detail="Domain list cannot be empty")
+    
+    browser_manager = BrowserManager(max_concurrent=MAX_CONCURRENT_DOMAINS)
+    await browser_manager.start()
+    
+    try:
+        tasks = [process_domain(d, browser_manager) for d in request.domains]
+        results = await asyncio.gather(*tasks)
+    finally:
+        await browser_manager.stop()
+        
+    return [res.model_dump() for res in results]
+
+async def cli_main():
     if len(sys.argv) < 2:
         print("Usage: python main.py <domains_file.txt>")
         sys.exit(1)
@@ -58,4 +104,5 @@ async def main():
     logger.info("Saved results to output.csv")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(cli_main())
+
