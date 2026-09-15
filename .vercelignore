@@ -1,0 +1,11 @@
+.git
+.gitignore
+.pytest_cache/
+tests/
+docs/
+venv/
+.venv/
+walkthrough_script.md
+output.json
+output.csv
+.env

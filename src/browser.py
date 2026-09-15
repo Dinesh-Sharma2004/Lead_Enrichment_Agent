@@ -1,10 +1,15 @@
 import asyncio
 import aiohttp
-from playwright.async_api import async_playwright, Page, BrowserContext
 from urllib.parse import urlparse
 from .logger import get_logger
 
 logger = get_logger(__name__)
+
+try:
+    from playwright.async_api import async_playwright, Page, BrowserContext
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
 
 class BrowserManager:
     def __init__(self, max_concurrent: int = 3, timeout_seconds: int = 30):
@@ -14,9 +19,14 @@ class BrowserManager:
         self.playwright = None
         self.browser = None
         self.semaphore = asyncio.Semaphore(max_concurrent)
-        self.use_fallback = False
+        self.use_fallback = not PLAYWRIGHT_AVAILABLE
 
     async def start(self):
+        if not PLAYWRIGHT_AVAILABLE:
+            logger.info("Playwright not installed in environment. Using HTTP scraper fallback.")
+            self.use_fallback = True
+            return
+
         try:
             self.playwright = await async_playwright().start()
             self.browser = await self.playwright.chromium.launch(headless=True)
@@ -24,6 +34,7 @@ class BrowserManager:
         except Exception as e:
             logger.warning(f"Playwright failed to launch ({str(e)}). Switching to HTTP fallback scraper.")
             self.use_fallback = True
+
 
     async def stop(self):
         if self.browser:
