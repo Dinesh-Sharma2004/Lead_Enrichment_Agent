@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🤖 Autonomous Lead Enrichment Agent
+# Autonomous Lead Enrichment Agent
 
 **An enterprise-grade, asynchronous corporate intelligence platform powered by Next.js 14, FastAPI, Playwright web automation, BeautifulSoup DOM cleaning, Groq AI extraction, and SerpAPI enrichment.**
 
