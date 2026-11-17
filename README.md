@@ -2,14 +2,15 @@
 
 # 🤖 Autonomous Lead Enrichment Agent
 
-**An asynchronous, evidence-grounded corporate intelligence engine with Streamlit Web UI, Playwright web automation, BeautifulSoup content cleaning, Groq LLMs, and SerpAPI enrichment.**
+**An enterprise-grade, asynchronous corporate intelligence platform powered by Next.js 14, FastAPI, Playwright web automation, BeautifulSoup DOM cleaning, Groq AI extraction, and SerpAPI enrichment.**
 
+[![Next.js 14](https://img.shields.io/badge/Next.js-14.2-black.svg)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-v0.110-009688.svg)](https://fastapi.tiangolo.com/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-v1.31-red.svg)](https://streamlit.io/)
-[![Playwright](https://img.shields.io/badge/Playwright-Chromium-green.svg)](https://playwright.dev/python/)
 [![Groq API](https://img.shields.io/badge/Groq-openai%2Fgpt--oss--120b-orange.svg)](https://groq.com/)
 [![SerpAPI](https://img.shields.io/badge/SerpAPI-Search--Enrichment-purple.svg)](https://serpapi.com/)
 [![Pydantic v2](https://img.shields.io/badge/Pydantic-v2.6-red.svg)](https://docs.pydantic.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v3.4-38bdf8.svg)](https://tailwindcss.com/)
 
 </div>
 
@@ -17,155 +18,248 @@
 
 ## 📌 Overview
 
-The **Autonomous Lead Enrichment Agent** accepts company domains, autonomously navigates their websites via headless Chromium, discovers relevant subpages (About, Team, Products, Pricing, Careers, Contact), extracts cleaned DOM content, and leverages Groq LLMs to produce structured, evidence-grounded corporate intelligence.
+The **Autonomous Lead Enrichment Agent** accepts target company domains, autonomously crawls and navigates websites (via headless Chromium or high-speed HTTP fallback), discovers key subpages (`/about`, `/team`, `/pricing`, `/careers`, `/contact`), extracts cleaned content payloads, and leverages Groq LLMs to produce structured, evidence-grounded corporate intelligence.
 
-If key information (such as leadership) is missing from the website, the agent conditionally triggers external searches via **SerpAPI**, validating search results before merging.
+If key information (such as executive leadership) is missing from the website, the agent conditionally triggers external Google/LinkedIn search enrichment via **SerpAPI**, validating search results before merging.
 
 ### Interfaces
-- **🖥️ Streamlit Web App (`app.py`):** Interactive UI for custom domain input, fallback to `domains.txt`, dynamic data visualization, and instant JSON/CSV downloads.
-- **💻 Command-Line Interface (`main.py domains.txt`):** Batch CLI processing with `output.json` and `output.csv` export.
+- **🖥️ Next.js Web Dashboard (`frontend/`):** Modern SaaS application featuring real-time Server-Sent Events (SSE) streaming, interactive evidence inspection, dual confidence scores, and instant JSON/CSV exports.
+- **⚡ FastAPI Backend (`backend/`):** High-performance ASGI microservice serving health checks, interactive Swagger documentation (`/api/docs`), and the SSE streaming enrichment engine (`/api/enrich/stream`).
+- **💻 Command-Line Interface (`main.py`):** Batch CLI processing with tabular CSV and structured JSON output.
 
 ---
 
-## 🚀 Quick Start
+## 🏛️ Target Architecture & Monorepo Structure
 
-### 1. Installation
+The project is structured as a Vercel Services monorepo containing a Next.js frontend and a FastAPI backend deployed together under a single Vercel deployment URL:
 
-```bash
-# Clone repository
-git clone https://github.com/Dinesh-Sharma2004/Lead_Enrichment_Agent.git
-cd Lead_Enrichment_Agent
-
-# Install dependencies & Playwright Chromium
-pip install -r requirements.txt
-playwright install chromium
+```text
+Lead_Enrichment_Agent/
+│
+├── frontend/                     # Next.js App Router (TypeScript, Tailwind, Lucide)
+│   ├── app/
+│   │   ├── layout.tsx            # Global layout & metadata
+│   │   ├── page.tsx              # Primary SaaS dashboard interface
+│   │   └── globals.css           # Tailwind base styles & custom scrollbars
+│   ├── components/
+│   │   ├── DomainInput.tsx       # Multi-domain input with client validation
+│   │   ├── ProcessingStatus.tsx  # Live progress tracking with Cancel (AbortController)
+│   │   ├── CompanyCard.tsx       # Collapsible company intelligence cards
+│   │   ├── CompanyDetails.tsx    # Comprehensive breakdown of all extracted entities
+│   │   ├── ConfidenceIndicator.tsx# Visual dual-engine confidence badge (LLM vs Heuristic)
+│   │   ├── EvidenceLinks.tsx     # Verified source URLs & grounding indicators
+│   │   └── ExportResults.tsx     # Client-side JSON & RFC 4180 CSV downloads
+│   ├── lib/
+│   │   ├── api.ts                # Backend health check & API utilities
+│   │   ├── sse.ts                # Chunk-buffered Server-Sent Events reader
+│   │   ├── csv.ts                # Client-side RFC 4180 CSV generation & download
+│   │   └── types.ts              # Canonical TypeScript interfaces matching Pydantic
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── next.config.mjs
+│   └── tailwind.config.js
+│
+├── backend/                      # Python FastAPI Microservice
+│   ├── main.py                   # FastAPI app (SSE streaming, security validations, SSRF guards)
+│   ├── requirements.txt          # Python dependencies
+│   └── src/                      # Core agent implementation modules
+│       ├── __init__.py
+│       ├── agent.py              # Orchestration workflow
+│       ├── browser.py            # Playwright browser manager & aiohttp HTTP fallback
+│       ├── config.py             # Environment configuration & runtime thresholds
+│       ├── discovery.py          # Heuristic link scoring & subpage discovery
+│       ├── extraction.py         # BeautifulSoup HTML cleaning & DOM stripping
+│       ├── llm.py                # Groq LLM extraction & schema validation
+│       ├── logger.py             # Structured logging setup
+│       ├── schemas.py            # Pydantic models (CompanyIntelligence)
+│       └── search.py             # SerpAPI leadership fallback search
+│
+├── tests/                        # Comprehensive Pytest test suite (26 passing tests)
+│   ├── conftest.py               # Shared test fixtures & sys.path configuration
+│   ├── test_api.py               # Backend endpoint, validation, SSRF, & SSE tests
+│   ├── test_discovery.py         # URL discovery heuristics tests
+│   ├── test_extraction.py        # HTML boilerplate cleaning tests
+│   └── test_llm.py               # LLM schema & confidence score tests
+│
+├── docs/                         # Detailed architecture and tuning guides
+├── main.py                       # Root CLI backward-compatibility entry point
+├── requirements.txt              # Root testing and CLI dependencies
+├── .env.example                  # Environment configuration template
+├── .gitignore                    # Git ignore rules (node_modules, .next, .env)
+├── .vercelignore                 # Deployment bundle exclusion rules
+└── vercel.json                   # Vercel Services configuration
 ```
 
-### 2. Configure Environment
+---
 
-Copy `.env.example` to `.env` and set your API keys:
+## 🌐 API Endpoints
+
+The backend registers its endpoints with the `/api` prefix, seamlessly routed by Vercel Services:
+
+| Method | Endpoint | Responsibility |
+| :--- | :--- | :--- |
+| `GET` | `/api/health` | Returns backend availability, version, and environment configuration flags (no secrets leaked). |
+| `GET` | `/api/docs` | Interactive Swagger UI documentation. |
+| `GET` | `/api/openapi.json` | OpenAPI schema definition. |
+| `POST` | `/api/enrich/stream` | Validates domains, executes enrichment pipeline, and streams results via Server-Sent Events (SSE). |
+
+### Request Format (`POST /api/enrich/stream`)
+```json
+{
+  "domains": ["stripe.com", "linear.app"]
+}
+```
+
+### Server-Sent Events (SSE) Protocol
+- `event: started` — Initial payload with total domains to process.
+- `event: domain_started` — Notification that crawler and extraction have begun for a domain.
+- `event: domain_completed` — Emitted immediately when a domain finishes with the complete `CompanyIntelligence` object.
+- `event: domain_failed` — Emitted if a domain encounters an error, including a safe error message and fallback data.
+- `event: completed` — Final summary event containing total, success, and failure counts.
+
+---
+
+## 🚀 Local Development
+
+### 1. Prerequisites
+- Python 3.10+
+- Node.js 18+ (tested on v26)
+- npm 9+
+
+### 2. Environment Setup
+Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
-
+Fill in your API credentials:
 ```env
-GROQ_API_KEY=gsk_your_groq_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 SERPAPI_API_KEY=your_serpapi_api_key_here
 ENABLE_SERPAPI=True
 ```
 
-### 3. Execution Options
-
-#### Option A: Streamlit Web UI (Interactive)
+### 3. Install Dependencies
 ```bash
-streamlit run app.py
-```
-- Enter target domains in the text area (e.g. `stripe.com`, `supabase.com`).
-- If left empty, clicking **Start Lead Enrichment** automatically uses default domains from `domains.txt`.
-- View interactive metrics, tables, and download JSON/CSV files.
+# Backend / root dependencies
+pip install -r requirements.txt
 
-#### Option B: Command Line Interface (CLI)
+# (Optional) Install Playwright Chromium for local full-browser rendering
+playwright install chromium
+
+# Frontend dependencies
+cd frontend
+npm install
+cd ..
+```
+
+### 4. Running Locally
+
+#### Option A: Running with Vercel CLI (Recommended)
+From the repository root:
+```bash
+vercel dev
+```
+Both the Next.js frontend and FastAPI backend will start concurrently under one local port (default: `http://localhost:3000`).
+
+#### Option B: Running Services Individually
+Terminal 1 (Backend):
+```bash
+cd backend
+python -m uvicorn main:app --reload --port 8000
+```
+Terminal 2 (Frontend):
+```bash
+cd frontend
+npm run dev
+```
+Visit `http://localhost:3000` in your browser. (The Next.js dev server automatically proxies `/api/*` to `http://127.0.0.1:8000/api/*`).
+
+#### Option C: Command Line Interface (CLI)
 ```bash
 python main.py domains.txt
 ```
-
-Generated outputs:
-- **`output.json`**: Full structured Pydantic dataset with source URL evidence.
-- **`output.csv`**: Flattened tabular spreadsheet format.
+Generates `output.json` and `output.csv`.
 
 ---
 
-## ✨ Key Features
+## ☁️ Vercel Deployment Guide
 
-- **📊 Interactive Streamlit Web UI:** Multi-domain text input with `domains.txt` fallback and live dataset visualization.
-- **🌐 Autonomous Link Discovery & Mailto Harvesting:** Dynamically prioritizes key pages (`/about`, `/team`, `/pricing`, `/careers`, `/contact`) with bounded 2nd-hop discovery and extracts mailto contacts.
-- **🧹 Boilerplate Cleaning:** Strips scripts, styles, nav, and footers for token optimization.
-- **🛡️ Schema-Enforced Tool Calling:** Direct Pydantic schema-driven function calling with Groq LLM and `repair_llm_json` safety net.
-- **🔍 Hybrid SerpAPI Enrichment:** Fallback enrichment for missing leadership names and LinkedIn profiles.
-- **⚡ Failure-Isolated Concurrency:** Controlled parallel domain processing via `asyncio.Semaphore` with return_exceptions=True batch isolation.
+Deploying to Vercel requires zero complex setup thanks to Vercel Services.
 
----
+### 1. `vercel.json` Configuration
+The root `vercel.json` is configured using the official Vercel Services syntax:
 
-## 🛡️ Resilience & Limitations
-
-### 1. Retry & Exponential Backoff
-- **Web Navigation:** Page loading in `src/browser.py` uses a layered wait (`domcontentloaded` -> best-effort `networkidle` -> scroll -> hydration wait) wrapped in exponential backoff retries (`MAX_RETRIES` default: 2; 1s, 2s delay) for 5xx errors and network timeouts. 4xx client errors fail fast without retrying.
-- **API Rate Limiting:** Groq LLM tool calls and SerpAPI requests handle HTTP 429 rate limit responses with backoff retries respecting `Retry-After` headers.
-
-### 2. Bot-Block / Interstitial Detection
-- `is_blocked_page(html)` inspects page content for Cloudflare, Captcha, "Access Denied", and "Pardon Our Interruption" markers, and flags suspiciously short DOM text (< 200 characters).
-- **Limitation:** This is a lightweight heuristic detection mechanism; it flags blocked pages in `extraction_status` ("Blocked - Bot block detected on homepage") but does not solve interactive CAPTCHAs or bypass sophisticated anti-bot walls.
-
-### 3. Confidence Score Methodology
-- **Dual Scoring Engine:** Stores both `llm_confidence_score` (LLM self-assessed completeness and groundedness rating) and `heuristic_confidence_score` (rule-based score deducting points for missing overview, leadership, products, or contact info).
-- **Final Score:** Set to `min(llm_confidence_score, heuristic_confidence_score)` to ensure the score accurately reflects missing mandatory fields even if the LLM self-assesses optimistically.
-
-### 4. Leadership Grounding & Testimonial Mitigation
-- Leadership entries extracted from plain-text pages carry a risk of misidentifying customer quote bios or partner testimonials as company executives.
-- The extraction system prompt explicitly constrains leadership classification to identified team members/executives, and post-processing verifies `source_url` grounding against crawled pages. However, homepage-sourced quotes still carry minor false-positive risks without dedicated semantic structure.
-
-### 5. Tuning Environment Knobs (`.env`)
-| Variable | Default | Description |
-| :--- | :--- | :--- |
-| `NETWORK_IDLE_TIMEOUT_MS` | `5000` | Secondary best-effort timeout for `networkidle` load state. |
-| `PAGE_HYDRATION_TIMEOUT_MS` | `1000` | Short bounded wait following scroll trigger for dynamic hydration. |
-| `MAX_RETRIES` | `2` | Maximum retry attempts for web page navigation. |
-| `TOTAL_CONTEXT_CHAR_BUDGET` | `16000` | Total character context limit split across all collected subpages. |
-| `MAX_PAGES_PER_DOMAIN` | `5` | Maximum total pages crawled per domain (homepage + subpages). |
-| `MAX_CONCURRENT_DOMAINS` | `3` | Maximum parallel domain extractions. |
-
-
----
-
-## 📚 Project Documentation
-
-Detailed documentation is available in the [`docs/`](./docs/) directory:
-
-- 🏛️ **[System Architecture & Workflow](./docs/ARCHITECTURE.md)** – Detailed pipeline flowchart, component details, Streamlit integration, and heuristic link scoring.
-- ⚙️ **[Configuration Reference](./docs/CONFIGURATION.md)** – Complete `.env` variables table and performance tuning.
-- 💰 **[Token Optimization & Cost Control](./docs/TOKEN_OPTIMIZATION.md)** – DOM stripping efficiency benchmarks (~95% token reduction).
-- 🔍 **[Troubleshooting Guide](./docs/TROUBLESHOOTING.md)** – Solving API 401s, Playwright Linux dependencies, and timeouts.
-- 📊 **[Operational Impact & Benchmark](./docs/OPERATIONAL_IMPACT.md)** – Manual operations reduction (~80-85% automation).
-
----
-
-## 🧪 Running Unit Tests
-
-```bash
-pytest tests/
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend/",
+      "framework": "nextjs"
+    },
+    "backend": {
+      "root": "backend/",
+      "framework": "fastapi",
+      "entrypoint": "main:app"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api",
+      "destination": { "service": "backend" }
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": { "service": "backend" }
+    },
+    {
+      "source": "/(.*)",
+      "destination": { "service": "frontend" }
+    }
+  ]
+}
 ```
 
+### 2. Deployment Steps
+1. Push your repository to GitHub.
+2. Go to [vercel.com](https://vercel.com/new) and import your repository.
+3. In Project Settings, add the following Environment Variables:
+   - `GROQ_API_KEY` (Required): Your Groq API key.
+   - `SERPAPI_API_KEY` (Optional): Your SerpAPI key.
+   - `ENABLE_SERPAPI`: `True` (or `False`).
+   - `MAX_DOMAINS_PER_REQUEST`: `3`
+   - `BATCH_TIMEOUT_SECONDS`: `55`
+4. Click **Deploy**.
+
 ---
 
-## 📂 Repository Structure
+## 🛡️ Playwright vs. HTTP Scraper Fallback
 
-```text
-Lead_Enrichment_Agent/
-├── docs/                 # Detailed documentation modules
-│   ├── ARCHITECTURE.md
-│   ├── CONFIGURATION.md
-│   ├── OPERATIONAL_IMPACT.md
-│   ├── TOKEN_OPTIMIZATION.md
-│   └── TROUBLESHOOTING.md
-├── src/                  # Core agent implementation modules
-│   ├── agent.py          # Orchestration workflow
-│   ├── browser.py        # Playwright browser manager
-│   ├── config.py         # Environment configuration
-│   ├── discovery.py      # Heuristic link scoring
-│   ├── extraction.py     # BeautifulSoup DOM cleaning
-│   ├── llm.py            # Groq LLM extraction & pre-normalization
-│   ├── logger.py         # Logging setup
-│   ├── schemas.py        # Pydantic data schemas
-│   └── search.py         # SerpAPI leadership fallback
-├── tests/                # Pytest unit tests
-├── app.py                # Streamlit Web UI application
-├── main.py               # CLI entry point
-├── .env.example          # Environment template
-├── domains.txt           # Input domain list default
-├── output.csv            # Tabular output dataset
-├── output.json           # JSON structured dataset
-├── README.md             # High-level overview
-└── WALKTHROUGH_SCRIPT.md # Loom video narration guide
+- **Local Development:** When Playwright Chromium binaries are installed (`playwright install chromium`), `BrowserManager` launches headless Chromium, enabling full client-side JavaScript execution, dynamic hydration waiting, and simulated user scrolling.
+- **Vercel Serverless Environment:** Serverless environments cannot package large 300MB+ Chromium binaries or Linux C libraries (`libnss3`, `libasound2`). `BrowserManager` automatically detects the serverless context and gracefully falls back to `aiohttp` HTTP scraping with custom browser user-agents, redirect following, and connection pooling.
+- **Transparency on Limitations:** Heavily obfuscated Single Page Applications (SPAs) that require client-side JavaScript execution to render basic text will yield less content under the HTTP fallback scraper. For 100% JavaScript-rendered web applications, deploy with full Playwright on a Docker/VPS server or utilize a headless browser service.
+
+---
+
+## 🔒 Security & Reliability
+
+- **SSRF & Private IP Protection:** The backend strictly rejects `localhost`, loopback addresses (`127.0.0.1`, `::1`), private networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), link-local IPs (`169.254.0.0/16`), and cloud metadata services (`metadata.google.internal`).
+- **Domain Whitelisting & FQDN Validation:** Rejects arbitrary schemas, port injection, and invalid domain structures.
+- **Batch Execution Budget:** Enforces a bounded execution timeout per request (`BATCH_TIMEOUT_SECONDS = 55`) with safety buffers to prevent hanging functions.
+- **Client Disconnection Handling:** The SSE streaming generator inspects `request.is_disconnected()` between domain steps, terminating pending tasks and releasing browser/network resources if the user leaves or clicks Cancel.
+- **API Key Secrecy:** Neither `GROQ_API_KEY` nor `SERPAPI_API_KEY` are ever exposed to the client, logged, or returned via health checks.
+
+---
+
+## 🧪 Running Automated Tests
+
+```bash
+# Run backend test suite (26 unit & integration tests)
+pytest tests/
+
+# Run frontend production build & TypeScript validation
+cd frontend
+npm run build
 ```
 
 ---

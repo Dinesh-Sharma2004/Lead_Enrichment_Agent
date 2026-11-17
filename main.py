@@ -3,6 +3,13 @@ import sys
 import json
 import pandas as pd
 from pathlib import Path
+
+# Ensure backend directory is in sys.path for CLI execution
+ROOT_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = ROOT_DIR / "backend"
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
 from src.browser import BrowserManager
 from src.agent import process_domain
 from src.logger import get_logger

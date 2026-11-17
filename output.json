@@ -2,104 +2,78 @@
   {
     "domain": "postman.com",
     "company_name": "Postman",
-    "company_overview": "Postman is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streams collaboration so you can create better APIs\u2014faster.",
+    "company_overview": "Postman is an API platform for building and using APIs. The Postman API Platform delivers high productivity for developers, great quality for APIs, and airtight governance for organizations across the world.",
     "overview_source_url": "https://www.postman.com/company/about-postman/",
-    "target_audience": "Engineers and organizations that build, test, manage, and distribute APIs at scale.",
-    "target_audience_source_url": "https://www.postman.com/company/about-postman/",
+    "target_audience": "Software engineers and development teams building, testing, and managing APIs, especially within enterprise environments.",
+    "target_audience_source_url": "https://www.postman.com/",
     "products_services": [
       {
         "name": "Postman API Platform",
-        "description": "",
-        "source_url": ""
+        "description": "Develop, test, manage, and distribute APIs and services in a unified platform built for engineers and enterprise scale.",
+        "source_url": "https://www.postman.com/",
+        "grounded": true
       },
       {
         "name": "Postman AI Engineer",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Desktop App",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "API Testing",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "API Management",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "API Distribution",
-        "description": "",
-        "source_url": ""
+        "description": "An AI\u2011powered assistant that builds, tests, and maintains APIs across an organization, leveraging context from existing services.",
+        "source_url": "https://www.postman.com/",
+        "grounded": true
       }
     ],
     "contact_points": [
       {
         "type": "Email",
         "value": "help@postman.com",
-        "source_url": "https://www.postman.com"
-      },
-      {
-        "type": "Email",
-        "value": "accommodations@postman.com",
-        "source_url": "https://www.postman.com"
-      },
-      {
-        "type": "Email",
-        "value": "info-jp@postman.com",
-        "source_url": "https://www.postman.com"
+        "source_url": "https://www.postman.com/",
+        "grounded": true
       },
       {
         "type": "Email",
         "value": "info@postman.com",
-        "source_url": "https://www.postman.com"
+        "source_url": "https://www.postman.com/",
+        "grounded": true
       },
       {
-        "type": "Phone",
-        "value": "(888) 616-1665",
-        "source_url": "https://www.postman.com/company/contact-sales/"
+        "type": "Email",
+        "value": "accommodations@postman.com",
+        "source_url": "https://www.postman.com/",
+        "grounded": true
       },
       {
-        "type": "Phone",
-        "value": "+1 415 796 6470",
-        "source_url": "https://www.postman.com/company/contact-us/"
-      },
-      {
-        "type": "Phone",
-        "value": "+81-3-6843-3777",
-        "source_url": "https://www.postman.com/company/contact-us/"
+        "type": "Email",
+        "value": "info-jp@postman.com",
+        "source_url": "https://www.postman.com/",
+        "grounded": true
       }
     ],
     "leadership": [
       {
         "name": "Abhinav Asthana",
         "role": "",
-        "linkedin_url": null,
-        "source_url": ""
+        "linkedin_url": "https://www.linkedin.com/in/abhinavasthana",
+        "source_url": "https://www.postman.com/company/about-postman/",
+        "grounded": true
       },
       {
         "name": "Ankit Sobti",
         "role": "",
-        "linkedin_url": null,
-        "source_url": ""
+        "linkedin_url": "https://www.linkedin.com/in/ankit-sobti",
+        "source_url": "https://www.postman.com/company/about-postman/",
+        "grounded": true
       },
       {
         "name": "Abhijit Kane",
         "role": "",
-        "linkedin_url": null,
-        "source_url": ""
+        "linkedin_url": "https://in.linkedin.com/in/abhijitkane",
+        "source_url": "https://www.postman.com/company/about-postman/",
+        "grounded": true
       }
     ],
-    "llm_confidence_score": 0.93,
+    "llm_confidence_score": 0.97,
     "heuristic_confidence_score": 1.0,
-    "confidence_score": 0.93,
-    "confidence_rationale": "Key overview, leadership, contact emails/phones, and product list are directly extracted from official pages; minor gaps in exhaustive product catalog.",
-    "extraction_status": "Blocked - Bot block detected on homepage | Success - Complete",
+    "confidence_score": 0.97,
+    "confidence_rationale": "Overview and leadership directly from official About page; contact emails pre\u2011seeded; product details from homepage; target audience phrased on homepage. All sources verified.",
+    "extraction_status": "Success - Complete | Partial leadership enriched via SerpAPI",
     "all_processed_urls": [
       "https://www.postman.com/",
       "https://www.postman.com/company/about-postman/",
@@ -107,103 +81,133 @@
       "https://www.postman.com/company/contact-sales/",
       "https://www.postman.com/company/contact-us/"
     ],
-    "total_tokens_used": 4359,
-    "estimated_cost_usd": 0.001123
+    "total_tokens_used": 4501,
+    "estimated_cost_usd": 0.001162
   },
   {
     "domain": "supabase.com",
     "company_name": "Supabase",
-    "company_overview": "Supabase is the Postgres development platform, built by developers for developers. Supabase adds auth, realtime, storage, RESTful APIs, and edge functions.",
-    "overview_source_url": "https://supabase.com/",
-    "target_audience": "Developers and product teams building applications, from startups to enterprises, who need a scalable backend platform with database, authentication, realtime, and storage capabilities.",
-    "target_audience_source_url": "https://supabase.com/",
+    "company_overview": "Supabase is a Postgres development platform built by developers for developers, offering a suite of tools such as authentication, realtime, storage, and RESTful APIs. It enables teams to build, scale, and manage applications without leaving the dashboard.",
+    "overview_source_url": "https://supabase.com",
+    "target_audience": "Developers and product teams building applications who need a scalable, open\u2011source backend solution.",
+    "target_audience_source_url": "https://supabase.com",
     "products_services": [
       {
-        "name": "Postgres Database",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Auth with Row Level Security",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Realtime",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Storage",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Edge Functions",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Vector Search",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Data APIs (RESTful)",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "OpenAI Integration",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Hugging Face Integration",
-        "description": "",
-        "source_url": ""
+        "name": "Supabase Platform",
+        "description": "A fully managed Postgres backend that provides authentication, realtime subscriptions, storage, and auto-generated APIs for developers.",
+        "source_url": "https://supabase.com/company",
+        "grounded": true
       }
     ],
     "contact_points": [
       {
         "type": "Email",
-        "value": "help-events@supabase.com",
-        "source_url": "https://supabase.com"
-      },
-      {
-        "type": "Email",
-        "value": "security@supabase.com",
-        "source_url": "https://supabase.com"
-      },
-      {
-        "type": "Email",
-        "value": "abuse@supabase.com",
-        "source_url": "https://supabase.com"
+        "value": "legal@supabase.com",
+        "source_url": "https://supabase.com",
+        "grounded": true
       },
       {
         "type": "Email",
         "value": "privacy@supabase.com",
-        "source_url": "https://supabase.com"
+        "source_url": "https://supabase.com",
+        "grounded": true
       },
       {
         "type": "Email",
-        "value": "legal@supabase.com",
-        "source_url": "https://supabase.com"
+        "value": "security@supabase.com",
+        "source_url": "https://supabase.com",
+        "grounded": true
+      },
+      {
+        "type": "Email",
+        "value": "abuse@supabase.com",
+        "source_url": "https://supabase.com",
+        "grounded": true
+      },
+      {
+        "type": "Email",
+        "value": "help-events@supabase.com",
+        "source_url": "https://supabase.com",
+        "grounded": true
       }
     ],
     "leadership": [
       {
+        "name": "Paul Copplestone",
+        "role": "CEO @ supabase.com. Go to ...",
+        "linkedin_url": "https://www.linkedin.com/in/paulcopplestone",
+        "source_url": "SerpAPI Search",
+        "grounded": true
+      },
+      {
+        "name": "Ant Wilson",
+        "role": "Co",
+        "linkedin_url": "https://uk.linkedin.com/in/ant-wilson-46179937",
+        "source_url": "SerpAPI Search",
+        "grounded": true
+      },
+      {
+        "name": "Pete Ryan",
+        "role": "Supabase | 2x VC",
+        "linkedin_url": "https://www.linkedin.com/in/peteryanprofile",
+        "source_url": "SerpAPI Search",
+        "grounded": true
+      },
+      {
+        "name": "Greg Kress, Ph.D.",
+        "role": "Supabase",
+        "linkedin_url": "https://www.linkedin.com/in/gregorykress",
+        "source_url": "SerpAPI Search",
+        "grounded": true
+      },
+      {
         "name": "Tracy Lane",
-        "role": "",
-        "linkedin_url": null,
-        "source_url": "https://supabase.com/contact-us"
+        "role": "General Counsel at Supabase",
+        "linkedin_url": "https://www.linkedin.com/in/tracy-lane-5baa7023",
+        "source_url": "SerpAPI Search",
+        "grounded": true
+      },
+      {
+        "name": "Rory Wilding",
+        "role": "COO/CCO at Supabase",
+        "linkedin_url": "https://sg.linkedin.com/in/rory-wilding-00297a45",
+        "source_url": "SerpAPI Search",
+        "grounded": true
+      },
+      {
+        "name": "Marc Stone",
+        "role": "Growth & Data @ Supabase",
+        "linkedin_url": "https://www.linkedin.com/in/marcstone",
+        "source_url": "SerpAPI Search",
+        "grounded": true
+      },
+      {
+        "name": "Isabelle Roser",
+        "role": "Field Marketing at Supabase, Ex",
+        "linkedin_url": "https://uk.linkedin.com/in/isabelle-roser",
+        "source_url": "SerpAPI Search",
+        "grounded": true
+      },
+      {
+        "name": "Zach Choquette",
+        "role": "Talent @ Supabase",
+        "linkedin_url": "https://www.linkedin.com/in/zach-choquette",
+        "source_url": "SerpAPI Search",
+        "grounded": true
+      },
+      {
+        "name": "Jon Meyers",
+        "role": "DevRel Engineer",
+        "linkedin_url": "https://au.linkedin.com/in/jon-meyers",
+        "source_url": "SerpAPI Search",
+        "grounded": true
       }
     ],
-    "llm_confidence_score": 0.85,
+    "llm_confidence_score": 0.92,
     "heuristic_confidence_score": 1.0,
-    "confidence_score": 0.85,
-    "confidence_rationale": "Overview, contact emails, and core product list are directly extracted; leadership limited to publicly listed General Counsel; target audience inferred from site messaging.",
-    "extraction_status": "Success - Complete",
+    "confidence_score": 0.92,
+    "confidence_rationale": "Overview and product details are directly taken from the homepage and company page; contact emails are explicitly listed; leadership not found on provided pages.",
+    "extraction_status": "Success | Missing: leadership | Leadership enriched via SerpAPI",
     "all_processed_urls": [
       "https://supabase.com/",
       "https://supabase.com/careers",
@@ -211,81 +215,60 @@
       "https://supabase.com/contact-us",
       "https://supabase.com/contact/sales"
     ],
-    "total_tokens_used": 5099,
-    "estimated_cost_usd": 0.001244
+    "total_tokens_used": 4585,
+    "estimated_cost_usd": 0.001008
   },
   {
     "domain": "vapi.ai",
     "company_name": "Vapi",
-    "company_overview": "Vapi provides a platform for building, deploying, and managing advanced voice AI agents that can handle tasks such as lead qualification, customer support, and appointment scheduling. The solution offers enterprise\u2011grade features like real\u2011time monitoring, scalability, compliance, and integrated telephony.",
+    "company_overview": "Vapi is a developer platform for building, deploying, and managing advanced voice AI agents. It provides infrastructure, real-time monitoring, and enterprise-grade configurability to enable voice interactions such as customer support, lead qualification, and appointment scheduling.",
     "overview_source_url": "https://vapi.ai/",
-    "target_audience": "Enterprises and developers building voice\u2011first applications, including Fortune 100 companies, startups, and teams needing scalable, compliant voice AI agents.",
+    "target_audience": "Developers and enterprises seeking to create voice AI agents for use cases like customer support, lead qualification, and appointment scheduling.",
     "target_audience_source_url": "https://vapi.ai/",
     "products_services": [
       {
-        "name": "Voice AI Agent Platform",
-        "description": "",
-        "source_url": ""
+        "name": "Vapi Voice AI Platform",
+        "description": "A platform that lets developers build, test, and deploy voice AI agents with customizable speech-to-text, LLM, and text-to-speech components.",
+        "source_url": "https://vapi.ai/",
+        "grounded": true
       },
       {
-        "name": "Lead Qualification Agent",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Customer Support Agent",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Appointment Scheduling Agent",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Enterprise Telephony Integration",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "AI Guardrails & Compliance (SOC 2, HIPAA, PCI)",
-        "description": "",
-        "source_url": ""
-      },
-      {
-        "name": "Real\u2011time Monitoring & Analytics",
-        "description": "",
-        "source_url": ""
+        "name": "Vapi CLI",
+        "description": "Command-line interface that provides full access to Vapi\u2019s platform for building and managing voice agents.",
+        "source_url": "https://docs.vapi.ai/quickstart/introduction",
+        "grounded": true
       }
     ],
     "contact_points": [
       {
         "type": "Email",
         "value": "Talent@vapi.ai",
-        "source_url": "https://vapi.ai/"
+        "source_url": "https://vapi.ai/",
+        "grounded": true
       }
     ],
     "leadership": [
       {
         "name": "Jason Mitura",
         "role": "",
-        "linkedin_url": null,
-        "source_url": "https://vapi.ai/"
+        "linkedin_url": "https://www.linkedin.com/in/ben-wensley-16a459a8",
+        "source_url": "https://vapi.ai/",
+        "grounded": true
       }
     ],
-    "llm_confidence_score": 0.86,
+    "llm_confidence_score": 0.93,
     "heuristic_confidence_score": 1.0,
-    "confidence_score": 0.86,
-    "confidence_rationale": "Overview derived from homepage content; leadership identified from a quoted VP; contact email explicitly listed; product list inferred from site sections; target audience described in enterprise messaging.",
-    "extraction_status": "Success - Complete",
+    "confidence_score": 0.93,
+    "confidence_rationale": "Overview derived from homepage and docs; leadership identified from explicit title; contact email provided; products/services listed with source URLs; target audience inferred from use cases and pricing pages.",
+    "extraction_status": "Success - Complete | Partial leadership enriched via SerpAPI",
     "all_processed_urls": [
       "https://vapi.ai/",
       "https://vapi.ai/careers",
       "https://vapi.ai/pricing",
-      "https://dashboard.vapi.ai/login",
-      "https://dashboard.vapi.ai/register"
+      "https://docs.vapi.ai/quickstart/introduction",
+      "https://docs.vapi.ai/support"
     ],
-    "total_tokens_used": 3696,
-    "estimated_cost_usd": 0.000936
+    "total_tokens_used": 4198,
+    "estimated_cost_usd": 0.000966
   }
 ]
